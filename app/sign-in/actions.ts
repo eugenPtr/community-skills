@@ -10,6 +10,8 @@ export async function sendMagicLink(formData: FormData) {
     redirect("/sign-in?error=missing-email");
   }
 
+  const invite = String(formData.get("invite") ?? "").trim() || null;
+
   const supabase = await createSupabaseServerClient();
   const requestHeaders = await headers();
   // `Origin` includes the protocol; `x-forwarded-host` is just the host.
@@ -17,7 +19,10 @@ export async function sendMagicLink(formData: FormData) {
   const forwardedHost = requestHeaders.get("x-forwarded-host");
   const baseUrl =
     origin ?? (forwardedHost ? `https://${forwardedHost}` : undefined);
-  const emailRedirectTo = baseUrl ? `${baseUrl}/auth/callback` : undefined;
+  const callbackPath = invite
+    ? `/auth/callback?invite=${encodeURIComponent(invite)}`
+    : "/auth/callback";
+  const emailRedirectTo = baseUrl ? `${baseUrl}${callbackPath}` : undefined;
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
