@@ -8,7 +8,7 @@ export function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+      className="rounded bg-purple-600 px-4 py-2 text-white disabled:opacity-50 hover:bg-purple-700"
     >
       {pending ? "Sending…" : "Send magic link"}
     </button>
