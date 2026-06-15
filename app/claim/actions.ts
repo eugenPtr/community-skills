@@ -14,13 +14,12 @@ export async function claimInviteAction(formData: FormData) {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData.user) {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) {
     redirect("/sign-in");
   }
-  const user = userData.user;
-  const email = user.email;
-  if (!email) {
+  const { user } = data;
+  if (!user.email) {
     redirect("/sign-in?error=missing-email");
   }
 
@@ -31,7 +30,7 @@ export async function claimInviteAction(formData: FormData) {
   const result = await claimInvite(service, {
     code,
     userId: user.id,
-    email,
+    email: user.email,
   });
 
   if (result.kind === "invalid") {

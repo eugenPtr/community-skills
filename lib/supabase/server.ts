@@ -19,7 +19,7 @@ export async function createSupabaseServerClient() {
           });
         } catch {
           // setAll throws when called from a Server Component — fine, the
-          // middleware refreshes the session.
+          // proxy refreshes the session.
         }
       },
     },
