@@ -1,4 +1,5 @@
 import { sendMagicLink } from "./actions";
+import { SubmitButton } from "./submit-button";
 
 type SearchParams = Promise<{ sent?: string; error?: string; invite?: string }>;
 
@@ -32,12 +33,7 @@ export default async function SignInPage({
           className="rounded border border-zinc-300 px-3 py-2"
           placeholder="you@example.com"
         />
-        <button
-          type="submit"
-          className="rounded bg-black px-4 py-2 text-white"
-        >
-          Send magic link
-        </button>
+        <SubmitButton />
       </form>
 
       {sent ? (
