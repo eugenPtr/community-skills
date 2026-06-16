@@ -25,6 +25,17 @@ The information a Member publishes about themselves: name, location, social link
 and skills.
 _Avoid_: Bio, page, account
 
+**Social Links**:
+The optional ways a Member can be reached or found, published on their Profile: phone, contact
+email, website, LinkedIn, Facebook, Instagram, X. All optional.
+_Avoid_: Contacts, handles
+
+**Contact Email**:
+An optional public email a Member chooses to publish as a Social Link so others can reach them.
+Distinct from the login email — it is display-only, never used for authentication or the
+Member gate, and may differ from (or be absent despite) the login email.
+_Avoid_: Email (unqualified), login email
+
 **Skill**:
 A capability a Member offers to the network (e.g. "construction with natural materials").
 The primary thing the AI search matches on.
