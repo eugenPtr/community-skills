@@ -4,6 +4,8 @@ import { PGlite } from "@electric-sql/pglite";
 import type { InviteRpcClient } from "@/lib/invites/claim";
 import type { InviteValidateClient } from "@/lib/invites/validate";
 import type { OnboardingDbClient } from "@/lib/onboarding/submit";
+import type { ListMembersClient } from "@/lib/community/list";
+import type { GetProfileClient, SocialKey } from "@/lib/profile/get";
 
 // The init migration references `auth.users(id)` because in production
 // Supabase owns the auth schema. PGlite doesn't ship with auth, so we
@@ -33,6 +35,15 @@ const MIGRATIONS_DIR = join(process.cwd(), "supabase", "migrations");
 const SCHEMA_MIGRATION = "20260615120100_init.sql";
 const PROFILES_MIGRATION = "20260615120200_profiles.sql";
 const SOCIALS_MIGRATION = "20260616120000_socials.sql";
+// The member-readable RLS policies (ADR-0006) reference auth.uid(), which pglite
+// does not provide, so they are exercised against the real local stack
+// (tests/rls-member-readable.test.ts), not here. The list/get *logic* seams
+// below run on pglite where RLS is off, which is exactly the boundary we want:
+// these tests prove ordering/shape/not-found, the RLS test proves the gate.
+// The member-readable RLS migration is deliberately NOT applied here: its
+// policy predicate calls auth.uid(), which pglite has no function for, so
+// CREATE POLICY would fail. pglite also connects as owner (RLS bypassed), so
+// the policies would have no effect anyway.
 
 export async function createTestDb(): Promise<PGlite> {
   const db = new PGlite();
@@ -154,6 +165,133 @@ export function pgliteOnboardingAdapter(db: PGlite): OnboardingDbClient {
       }
     },
   };
+}
+
+export function pgliteListMembersAdapter(db: PGlite): ListMembersClient {
+  return {
+    async fetchMemberCards() {
+      const result = await db.query<{
+        member_id: string;
+        name: string;
+        skills: string;
+        heart_project_description: string | null;
+        heart_project_seeking: boolean;
+      }>(
+        `select member_id, name, skills, heart_project_description, heart_project_seeking
+           from profiles`,
+      );
+      return {
+        data: result.rows.map((r) => ({
+          id: r.member_id,
+          name: r.name,
+          skills: r.skills,
+          heartProjectDescription: r.heart_project_description,
+          heartProjectSeeking: r.heart_project_seeking,
+        })),
+        error: null,
+      };
+    },
+  };
+}
+
+export function pgliteGetProfileAdapter(db: PGlite): GetProfileClient {
+  return {
+    async fetchProfile(memberId) {
+      const result = await db.query<{
+        member_id: string;
+        name: string;
+        location: string;
+        skills: string;
+        passions: string;
+        heart_project_description: string | null;
+        heart_project_seeking: boolean;
+      }>(
+        `select member_id, name, location, skills, passions,
+                heart_project_description, heart_project_seeking
+           from profiles where member_id = $1`,
+        [memberId],
+      );
+      const row = result.rows[0];
+      return {
+        data: row
+          ? {
+              id: row.member_id,
+              name: row.name,
+              location: row.location,
+              skills: row.skills,
+              passions: row.passions,
+              heartProjectDescription: row.heart_project_description,
+              heartProjectSeeking: row.heart_project_seeking,
+            }
+          : null,
+        error: null,
+      };
+    },
+    async fetchSocials(memberId) {
+      const result = await db.query<Record<SocialKey, string | null>>(
+        `select phone, email, website, linkedin, facebook, instagram, x
+           from socials where member_id = $1`,
+        [memberId],
+      );
+      return { data: result.rows[0] ?? null, error: null };
+    },
+  };
+}
+
+// Seed a fully-onboarded Member (auth.users + members + profiles, plus an
+// optional socials row) directly, so list/get tests start from a known set of
+// Members without driving onboarding. Returns the member id.
+export async function seedMember(
+  db: PGlite,
+  opts: {
+    name: string;
+    email?: string;
+    location?: string;
+    skills?: string;
+    passions?: string;
+    heartProjectDescription?: string | null;
+    heartProjectSeeking?: boolean;
+    socials?: Partial<Record<SocialKey, string>>;
+  },
+): Promise<string> {
+  const id = crypto.randomUUID();
+  const email = opts.email ?? `${id}@example.com`;
+  await db.query(`insert into auth.users (id, email) values ($1, $2)`, [
+    id,
+    email,
+  ]);
+  await db.query(`insert into members (id, email) values ($1, $2)`, [id, email]);
+  await db.query(
+    `insert into profiles
+       (member_id, name, location, skills, passions, heart_project_description, heart_project_seeking)
+     values ($1, $2, $3, $4, $5, $6, $7)`,
+    [
+      id,
+      opts.name,
+      opts.location ?? "Bucharest",
+      opts.skills ?? "skills",
+      opts.passions ?? "passions",
+      opts.heartProjectDescription ?? null,
+      opts.heartProjectSeeking ?? false,
+    ],
+  );
+  if (opts.socials) {
+    const keys: SocialKey[] = [
+      "phone",
+      "email",
+      "website",
+      "linkedin",
+      "facebook",
+      "instagram",
+      "x",
+    ];
+    await db.query(
+      `insert into socials (member_id, phone, email, website, linkedin, facebook, instagram, x)
+       values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [id, ...keys.map((k) => opts.socials?.[k] ?? null)],
+    );
+  }
+  return id;
 }
 
 // Seed an auth.users row + an unclaimed invite. Returns the user id and

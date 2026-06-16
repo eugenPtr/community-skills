@@ -8,7 +8,7 @@ in-app AI chat that searches over members.
 
 **Member**:
 A person who has completed onboarding with a valid Invite, published their Profile, and
-joined the network. Has full access to the Directory and People Search.
+joined the network. Has full access to the Community and People Search.
 _Avoid_: User, account
 
 **Admin**:
@@ -53,10 +53,11 @@ A Member either has one (described in their own words) or is still seeking one.
 Published on the profile and searchable alongside skills.
 _Avoid_: Project, initiative, work item
 
-**Directory**:
-The browsable listing of all Members. Every Member can see every other Member's full
-profile here, including social links. Discovery complement to People Search.
-_Avoid_: Roster, member list
+**Community**:
+The browsable listing of all Members, shown in alphabetical order. Every Member can see
+every other Member's full profile here, including social links. Discovery complement to
+People Search. Reached via `/community`.
+_Avoid_: Directory, Roster, member list
 
 **People Search**:
 The in-app AI chat where a Member asks in natural language for people who can help, and gets
