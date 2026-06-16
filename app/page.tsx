@@ -1,11 +1,26 @@
-import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function Home() {
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) {
-    redirect("/sign-in");
+    return (
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 px-6 py-16 text-center">
+        <h1 className="text-2xl font-semibold">
+          Welcome to the community skills chest
+        </h1>
+        <p className="text-sm text-zinc-600">
+          This is where you find all the resources to make your project reality
+        </p>
+        <Link
+          href="/sign-in"
+          className="rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
+        >
+          Sign in
+        </Link>
+      </main>
+    );
   }
 
   const { data: member } = await supabase
@@ -29,11 +44,30 @@ export default async function Home() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-4 px-6 py-16">
-      <h1 className="text-2xl font-semibold">Welcome, {member.email}</h1>
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+      <h1 className="text-2xl font-semibold">
+        Welcome to the community skills chest
+      </h1>
       <p className="text-sm text-zinc-600">
-        You're a Member. Directory and People Search land in later slices.
+        This is where you find all the resources to make your project reality
       </p>
+      <p className="mt-4 text-sm font-medium">Say what you need</p>
+      <div className="flex w-full items-end gap-2 rounded-2xl border border-zinc-300 bg-white p-3">
+        <textarea
+          rows={3}
+          disabled
+          placeholder="I want to build a house with natural materials. Who in the community can help me?"
+          className="flex-1 resize-none bg-transparent text-sm text-left outline-none placeholder:text-zinc-400 disabled:cursor-not-allowed"
+        />
+        <button
+          type="button"
+          disabled
+          aria-label="Send"
+          className="rounded-lg bg-purple-600 px-4 py-2 text-white disabled:opacity-50 hover:bg-purple-700"
+        >
+          Send
+        </button>
+      </div>
     </main>
   );
 }
