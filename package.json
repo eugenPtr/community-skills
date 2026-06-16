@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "seed": "node --env-file=.env.local --import tsx supabase/seed.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
