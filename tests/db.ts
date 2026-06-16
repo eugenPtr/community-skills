@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import type { InviteRpcClient } from "@/lib/invites/claim";
+import type { InviteValidateClient } from "@/lib/invites/validate";
+import type { OnboardingDbClient } from "@/lib/onboarding/submit";
 
 // The init migration references `auth.users(id)` because in production
 // Supabase owns the auth schema. PGlite doesn't ship with auth, so we
@@ -29,12 +31,15 @@ const MIGRATIONS_DIR = join(process.cwd(), "supabase", "migrations");
 // (CREATE EXTENSION vector) needs Supabase. pgvector isn't exercised yet
 // in this slice; issue #6 adds the column and its own tests.
 const SCHEMA_MIGRATION = "20260615120100_init.sql";
+const PROFILES_MIGRATION = "20260615120200_profiles.sql";
 
 export async function createTestDb(): Promise<PGlite> {
   const db = new PGlite();
   await db.exec(STUB_AUTH_SCHEMA);
-  const sql = readFileSync(join(MIGRATIONS_DIR, SCHEMA_MIGRATION), "utf8");
-  await db.exec(sql);
+  const schema = readFileSync(join(MIGRATIONS_DIR, SCHEMA_MIGRATION), "utf8");
+  await db.exec(schema);
+  const profiles = readFileSync(join(MIGRATIONS_DIR, PROFILES_MIGRATION), "utf8");
+  await db.exec(profiles);
   return db;
 }
 
@@ -57,6 +62,61 @@ export function pgliteRpcAdapter(db: PGlite): InviteRpcClient {
           data: null,
           error: { code: e.code, message: e.message ?? String(err) },
         };
+      }
+    },
+  };
+}
+
+export function pgliteValidateAdapter(db: PGlite): InviteValidateClient {
+  return {
+    async findInvite(code: string) {
+      const result = await db.query<{ claimed_by: string | null }>(
+        `select claimed_by from invites where code = $1`,
+        [code],
+      );
+      if (result.rows.length === 0) return null;
+      return { claimedBy: result.rows[0].claimed_by };
+    },
+  };
+}
+
+export function pgliteOnboardingAdapter(db: PGlite): OnboardingDbClient {
+  return {
+    async rpc(name, args) {
+      try {
+        const result = await db.query<{ claim_invite: string }>(
+          `select claim_invite($1, $2, $3) as claim_invite`,
+          [args.p_user_id, args.p_email, args.p_code],
+        );
+        return { data: result.rows[0].claim_invite, error: null };
+      } catch (err) {
+        const e = err as { code?: string; message?: string };
+        return {
+          data: null,
+          error: { code: e.code, message: e.message ?? String(err) },
+        };
+      }
+    },
+    async insertProfile(data) {
+      try {
+        await db.query(
+          `insert into profiles
+             (member_id, name, location, skills, passions, heart_project_description, heart_project_seeking)
+           values ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            data.memberId,
+            data.name,
+            data.location,
+            data.skills,
+            data.passions,
+            data.heartProjectDescription,
+            data.heartProjectSeeking,
+          ],
+        );
+        return { error: null };
+      } catch (err) {
+        const e = err as { message?: string };
+        return { error: { message: e.message ?? String(err) } };
       }
     },
   };
