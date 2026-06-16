@@ -6,6 +6,16 @@ export type SubmitOnboardingResult =
   | { kind: "invalidCode" }
   | { kind: "missingFields" };
 
+export interface SocialsInput {
+  phone?: string;
+  email?: string;
+  website?: string;
+  linkedin?: string;
+  facebook?: string;
+  instagram?: string;
+  x?: string;
+}
+
 export interface OnboardingDbClient extends InviteRpcClient {
   insertProfile(data: {
     memberId: string;
@@ -16,7 +26,27 @@ export interface OnboardingDbClient extends InviteRpcClient {
     heartProjectDescription: string | null;
     heartProjectSeeking: boolean;
   }): PromiseLike<{ error: { message: string } | null }>;
+  upsertSocials(data: {
+    memberId: string;
+    phone: string | null;
+    email: string | null;
+    website: string | null;
+    linkedin: string | null;
+    facebook: string | null;
+    instagram: string | null;
+    x: string | null;
+  }): PromiseLike<{ error: { message: string } | null }>;
 }
+
+const SOCIALS_FIELDS = [
+  "phone",
+  "email",
+  "website",
+  "linkedin",
+  "facebook",
+  "instagram",
+  "x",
+] as const;
 
 export async function submitOnboarding(
   client: OnboardingDbClient,
@@ -30,6 +60,7 @@ export async function submitOnboarding(
     passions: string;
     heartProjectSeeking: boolean;
     heartProjectDescription?: string;
+    socials?: SocialsInput;
   },
 ): Promise<SubmitOnboardingResult> {
   if (
@@ -62,6 +93,20 @@ export async function submitOnboarding(
   });
 
   if (error) throw new Error(`insertProfile failed: ${error.message}`);
+
+  const socials = Object.fromEntries(
+    SOCIALS_FIELDS.map((f) => [f, opts.socials?.[f]?.trim() || null]),
+  ) as Record<(typeof SOCIALS_FIELDS)[number], string | null>;
+
+  if (Object.values(socials).some((v) => v !== null)) {
+    const { error: socialsError } = await client.upsertSocials({
+      memberId: opts.userId,
+      ...socials,
+    });
+    if (socialsError) {
+      throw new Error(`upsertSocials failed: ${socialsError.message}`);
+    }
+  }
 
   return { kind: "ok" };
 }
