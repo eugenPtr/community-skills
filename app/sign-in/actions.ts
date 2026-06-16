@@ -29,6 +29,10 @@ export async function sendMagicLink(formData: FormData) {
 
   let callbackPath = "/auth/callback";
   let shouldCreateUser = false;
+  // "1" -> neutral, enumeration-safe confirmation. "invite" -> the definite
+  // "email sent" message, used only when a valid Invite was attached to a
+  // non-Member (ADR-0005).
+  let sentParam = "1";
 
   if (!member) {
     if (!invite) {
@@ -58,6 +62,7 @@ export async function sendMagicLink(formData: FormData) {
 
     callbackPath = `/auth/callback?invite=${encodeURIComponent(invite)}`;
     shouldCreateUser = true;
+    sentParam = "invite";
   }
 
   const requestHeaders = await headers();
@@ -83,5 +88,5 @@ export async function sendMagicLink(formData: FormData) {
     redirect(`/sign-in?error=${encodeURIComponent(error.message)}`);
   }
 
-  redirect("/sign-in?sent=1");
+  redirect(`/sign-in?sent=${sentParam}`);
 }

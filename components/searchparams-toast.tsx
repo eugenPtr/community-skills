@@ -14,9 +14,14 @@ const ERROR_MESSAGES: Record<string, string> = {
     "This invite has already been claimed — contact the person who invited you.",
 };
 
-// Shown for every magic-link request regardless of outcome — never reveal
-// whether the email is a Member. See ADR-0005.
-const SENT_MESSAGE = "If an account exists for this email, a link was sent.";
+// sent=invite: a valid Invite was attached, so we can confirm definitely.
+// sent=*: neutral confirmation that never reveals whether the email is a
+// Member. See ADR-0005.
+const SENT_MESSAGES: Record<string, string> = {
+  invite: "An email with a login link has been sent.",
+};
+const SENT_MESSAGE_NEUTRAL =
+  "If an account exists for this email, a link was sent.";
 
 export function SearchParamsToast() {
   const searchParams = useSearchParams();
@@ -37,7 +42,7 @@ export function SearchParamsToast() {
     if (error) {
       toast.error(ERROR_MESSAGES[error] ?? error);
     } else if (sent) {
-      toast.success(SENT_MESSAGE);
+      toast.success(SENT_MESSAGES[sent] ?? SENT_MESSAGE_NEUTRAL);
     }
 
     const next = new URLSearchParams(searchParams);

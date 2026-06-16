@@ -12,13 +12,23 @@ an attached Invite is only consulted when the email is not yet a Member.
 
 The three send-time outcomes:
 
-- **Email is a Member** → send the magic link. Show the neutral confirmation.
+- **Email is a Member** → send the magic link. Show the **neutral** confirmation.
 - **Not a Member, valid Invite attached** → send the magic link (creates the auth user),
-  callback carries the Invite to onboarding. Show the neutral confirmation.
-- **Not a Member, no/invalid Invite** → send nothing. Show the **same** neutral
-  confirmation. (An invalid or already-claimed Invite is surfaced as an explicit error,
-  because Invite validity is not membership disclosure — the sign-in page already reveals
-  it on load.)
+  callback carries the Invite to onboarding. Show the **definite** confirmation
+  *"An email with a login link has been sent."*
+- **Not a Member, no/invalid Invite** → send nothing. Show the **neutral** confirmation.
+  (An invalid or already-claimed Invite is surfaced as an explicit error, because Invite
+  validity is not membership disclosure — the sign-in page already reveals it on load.)
+
+Accepted leak (deliberate): the definite confirmation appears only when a valid Invite is
+attached and the email is *not* a Member. A holder of a valid Invite can therefore probe
+emails and distinguish Members (neutral message) from non-Members (definite message). We
+accept this: the leak is gated behind possessing a valid, unclaimed Invite — i.e. a
+person we already trust enough to admit — and it is consistent with ADR-0002's
+"fully trusted" posture. The neutral message still protects against an attacker with **no**
+Invite, which is the case that matters. The alternative (uniform definite message on every
+path, lying "email sent" even when nothing was sent) closes the leak fully but was rejected
+in favour of giving genuine new Members an honest, definite confirmation.
 
 Why: the network is private. Telling an arbitrary visitor "no Member on this email"
 turns the sign-in form into a membership oracle — anyone could probe emails and learn
