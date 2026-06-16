@@ -19,6 +19,16 @@ export async function submitOnboardingAction(formData: FormData) {
   const heartProjectSeeking = formData.get("heart_project_seeking") === "true";
   const heartProjectDescription = String(formData.get("heart_project_description") ?? "").trim() || undefined;
 
+  const socials = {
+    phone: String(formData.get("phone") ?? ""),
+    email: String(formData.get("contact_email") ?? ""),
+    website: String(formData.get("website") ?? ""),
+    linkedin: String(formData.get("linkedin") ?? ""),
+    facebook: String(formData.get("facebook") ?? ""),
+    instagram: String(formData.get("instagram") ?? ""),
+    x: String(formData.get("x") ?? ""),
+  };
+
   const service = await createSupabaseServiceClient();
   const result = await submitOnboarding(
     {
@@ -37,6 +47,19 @@ export async function submitOnboardingAction(formData: FormData) {
         });
         return { error: error ? { message: error.message } : null };
       },
+      async upsertSocials(row) {
+        const { error } = await service.from("socials").upsert({
+          member_id: row.memberId,
+          phone: row.phone,
+          email: row.email,
+          website: row.website,
+          linkedin: row.linkedin,
+          facebook: row.facebook,
+          instagram: row.instagram,
+          x: row.x,
+        });
+        return { error: error ? { message: error.message } : null };
+      },
     },
     {
       userId: data.user.id,
@@ -48,6 +71,7 @@ export async function submitOnboardingAction(formData: FormData) {
       passions,
       heartProjectSeeking,
       heartProjectDescription,
+      socials,
     },
   );
 

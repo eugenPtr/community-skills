@@ -59,6 +59,94 @@ describe("submitOnboarding (S1 integration seam)", () => {
     expect(invite.rows[0].claimed_by).toBe(seeded.userId);
   });
 
+  it("stores a socials row keyed by member when Social Links are provided", async () => {
+    const seeded = await seedUnclaimedInvite(db, {
+      code: "DEV-CCCC-0004",
+      email: "erin@example.com",
+    });
+
+    const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+      userId: seeded.userId,
+      email: seeded.email,
+      code: seeded.code,
+      ...BASE_PROFILE,
+      socials: {
+        phone: "+40 700 000 000",
+        email: "erin.contact@example.com",
+        website: "https://erin.example.com",
+        linkedin: "erin-li",
+        facebook: "erin-fb",
+        instagram: "erin-ig",
+        x: "erin-x",
+      },
+    });
+
+    expect(result).toEqual({ kind: "ok" });
+
+    const socials = await db.query<{
+      phone: string;
+      email: string;
+      website: string;
+      x: string;
+    }>(`select phone, email, website, x from socials where member_id = $1`, [
+      seeded.userId,
+    ]);
+    expect(socials.rows).toHaveLength(1);
+    expect(socials.rows[0].email).toBe("erin.contact@example.com");
+    expect(socials.rows[0].x).toBe("erin-x");
+  });
+
+  it("creates no socials row when no Social Links are provided", async () => {
+    const seeded = await seedUnclaimedInvite(db, {
+      code: "DEV-CCCC-0005",
+      email: "frank@example.com",
+    });
+
+    const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+      userId: seeded.userId,
+      email: seeded.email,
+      code: seeded.code,
+      ...BASE_PROFILE,
+    });
+
+    expect(result).toEqual({ kind: "ok" });
+
+    const socials = await db.query(
+      `select member_id from socials where member_id = $1`,
+      [seeded.userId],
+    );
+    expect(socials.rows).toHaveLength(0);
+  });
+
+  it("stores only provided Social Links and leaves the rest null", async () => {
+    const seeded = await seedUnclaimedInvite(db, {
+      code: "DEV-CCCC-0006",
+      email: "gina@example.com",
+    });
+
+    const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+      userId: seeded.userId,
+      email: seeded.email,
+      code: seeded.code,
+      ...BASE_PROFILE,
+      socials: { linkedin: "gina-li", phone: "   " },
+    });
+
+    expect(result).toEqual({ kind: "ok" });
+
+    const socials = await db.query<{
+      linkedin: string | null;
+      phone: string | null;
+      email: string | null;
+    }>(`select linkedin, phone, email from socials where member_id = $1`, [
+      seeded.userId,
+    ]);
+    expect(socials.rows).toHaveLength(1);
+    expect(socials.rows[0].linkedin).toBe("gina-li");
+    expect(socials.rows[0].phone).toBeNull();
+    expect(socials.rows[0].email).toBeNull();
+  });
+
   it("returns alreadyClaimed and creates no rows when code is already claimed", async () => {
     const first = await seedUnclaimedInvite(db, {
       code: "DEV-CCCC-0002",

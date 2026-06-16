@@ -32,6 +32,7 @@ const MIGRATIONS_DIR = join(process.cwd(), "supabase", "migrations");
 // in this slice; issue #6 adds the column and its own tests.
 const SCHEMA_MIGRATION = "20260615120100_init.sql";
 const PROFILES_MIGRATION = "20260615120200_profiles.sql";
+const SOCIALS_MIGRATION = "20260616120000_socials.sql";
 
 export async function createTestDb(): Promise<PGlite> {
   const db = new PGlite();
@@ -40,6 +41,8 @@ export async function createTestDb(): Promise<PGlite> {
   await db.exec(schema);
   const profiles = readFileSync(join(MIGRATIONS_DIR, PROFILES_MIGRATION), "utf8");
   await db.exec(profiles);
+  const socials = readFileSync(join(MIGRATIONS_DIR, SOCIALS_MIGRATION), "utf8");
+  await db.exec(socials);
   return db;
 }
 
@@ -111,6 +114,37 @@ export function pgliteOnboardingAdapter(db: PGlite): OnboardingDbClient {
             data.passions,
             data.heartProjectDescription,
             data.heartProjectSeeking,
+          ],
+        );
+        return { error: null };
+      } catch (err) {
+        const e = err as { message?: string };
+        return { error: { message: e.message ?? String(err) } };
+      }
+    },
+    async upsertSocials(data) {
+      try {
+        await db.query(
+          `insert into socials
+             (member_id, phone, email, website, linkedin, facebook, instagram, x)
+           values ($1, $2, $3, $4, $5, $6, $7, $8)
+           on conflict (member_id) do update set
+             phone = excluded.phone,
+             email = excluded.email,
+             website = excluded.website,
+             linkedin = excluded.linkedin,
+             facebook = excluded.facebook,
+             instagram = excluded.instagram,
+             x = excluded.x`,
+          [
+            data.memberId,
+            data.phone,
+            data.email,
+            data.website,
+            data.linkedin,
+            data.facebook,
+            data.instagram,
+            data.x,
           ],
         );
         return { error: null };

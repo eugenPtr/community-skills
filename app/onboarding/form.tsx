@@ -87,6 +87,48 @@ export default function OnboardingForm({ invite }: { invite: string }) {
           )}
         </div>
 
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium">Social Links</p>
+          <p className="-mt-2 text-xs text-zinc-500">
+            All optional. Shown on your Profile so Members can reach you.
+          </p>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="phone" className="text-sm font-medium">Phone</label>
+            <input id="phone" name="phone" type="tel" disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="contact_email" className="text-sm font-medium">Contact email</label>
+            <input id="contact_email" name="contact_email" type="email" disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="website" className="text-sm font-medium">Website</label>
+            <input id="website" name="website" disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="linkedin" className="text-sm font-medium">LinkedIn</label>
+            <input id="linkedin" name="linkedin" disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="facebook" className="text-sm font-medium">Facebook</label>
+            <input id="facebook" name="facebook" disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="instagram" className="text-sm font-medium">Instagram</label>
+            <input id="instagram" name="instagram" disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="x" className="text-sm font-medium">X</label>
+            <input id="x" name="x" disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
+          </div>
+        </div>
+
         <button
           type="submit"
           disabled={submitting}
