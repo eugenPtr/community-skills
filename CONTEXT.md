@@ -7,8 +7,8 @@ in-app AI chat that searches over members.
 ## Language
 
 **Member**:
-A person who has claimed an invite and joined the network. Has a profile and can search
-for other members.
+A person who has completed onboarding with a valid Invite, published their Profile, and
+joined the network. Has full access to the Directory and People Search.
 _Avoid_: User, account
 
 **Admin**:
@@ -21,7 +21,7 @@ sent out of band, and claimed once during sign-up.
 _Avoid_: Invitation link, token, voucher
 
 **Profile**:
-The information a Member publishes about themselves: name, location, social links, projects,
+The information a Member publishes about themselves: name, location, social links, heart project,
 and skills.
 _Avoid_: Bio, page, account
 
@@ -30,10 +30,17 @@ A capability a Member offers to the network (e.g. "construction with natural mat
 The primary thing the AI search matches on.
 _Avoid_: Tag, expertise, service
 
-**Project**:
-A piece of work a Member cares about and is involved in. Published on the profile and
-searchable alongside skills.
-_Avoid_: Initiative, work item
+**Passions**:
+What a Member feels most alive doing — the activities, work, and experiences that bring them
+into a state of flow, presence, and love. A free-text field written in the Member's own voice.
+Required during onboarding. Published on the profile.
+_Avoid_: Interests, hobbies, bio
+
+**Heart Project**:
+The single pursuit a Member is most devoted to — the work or becoming they do with love.
+A Member either has one (described in their own words) or is still seeking one.
+Published on the profile and searchable alongside skills.
+_Avoid_: Project, initiative, work item
 
 **Directory**:
 The browsable listing of all Members. Every Member can see every other Member's full

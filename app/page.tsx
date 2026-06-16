@@ -14,7 +14,18 @@ export default async function Home() {
     .eq("id", userData.user.id)
     .maybeSingle();
   if (!member) {
-    redirect("/claim");
+    // Authenticated but onboarding never completed (ADR-0004: expected and
+    // transient). We have no Invite code here, so we can't resume onboarding —
+    // point them back to their Invite link, which carries it.
+    return (
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
+        <h1 className="text-2xl font-semibold">Finish joining</h1>
+        <p className="text-sm text-zinc-600">
+          You haven't completed onboarding yet. Open your invite link again to
+          pick up where you left off.
+        </p>
+      </main>
+    );
   }
 
   return (

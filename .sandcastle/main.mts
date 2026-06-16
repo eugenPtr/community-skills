@@ -111,6 +111,11 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     });
 
     console.log("\nReview complete.");
+
+    // Push branch so it's visible on GitHub and can be turned into a PR.
+    const { execSync } = await import("child_process");
+    execSync(`git push origin ${branch}`, { stdio: "inherit" });
+    console.log(`\nPushed: ${branch}`);
   } finally {
     await sandbox.close();
   }

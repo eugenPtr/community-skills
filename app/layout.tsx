@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
+import { Toaster } from "sonner";
+import { SearchParamsToast } from "@/components/searchparams-toast";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,7 +30,13 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        {children}
+        <Toaster richColors position="top-center" duration={5000} />
+        <Suspense>
+          <SearchParamsToast />
+        </Suspense>
+      </body>
     </html>
   );
 }
