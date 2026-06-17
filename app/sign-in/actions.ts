@@ -29,10 +29,6 @@ export async function sendMagicLink(formData: FormData) {
 
   let callbackPath = "/auth/callback";
   let shouldCreateUser = false;
-  // "1" -> neutral, enumeration-safe confirmation. "invite" -> the definite
-  // "email sent" message, used only when a valid Invite was attached to a
-  // non-Member (ADR-0005).
-  let sentParam = "1";
 
   if (!member) {
     if (!invite) {
@@ -62,7 +58,6 @@ export async function sendMagicLink(formData: FormData) {
 
     callbackPath = `/auth/callback?invite=${encodeURIComponent(invite)}`;
     shouldCreateUser = true;
-    sentParam = "invite";
   }
 
   const requestHeaders = await headers();
@@ -88,5 +83,14 @@ export async function sendMagicLink(formData: FormData) {
     redirect(`/sign-in?error=${encodeURIComponent(error.message)}`);
   }
 
-  redirect(`/sign-in?sent=${sentParam}`);
+  // Invite mode (a valid Invite rode the form, so a link was definitely sent —
+  // for a Member or a new Member alike): show the definite "check your inbox"
+  // panel. Showing it for every email closes ADR-0005's Member/non-Member leak
+  // in the invite case, and is always honest. Every other case gets the neutral
+  // confirmation that never reveals whether the email is a Member.
+  if (invite) {
+    redirect(`/sign-in?invite=${encodeURIComponent(invite)}&checkInbox=1`);
+  }
+
+  redirect("/sign-in?sent=1");
 }

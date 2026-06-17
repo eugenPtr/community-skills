@@ -14,12 +14,10 @@ const ERROR_MESSAGES: Record<string, string> = {
     "This invite has already been claimed — contact the person who invited you.",
 };
 
-// sent=invite: a valid Invite was attached, so we can confirm definitely.
 // sent=*: neutral confirmation that never reveals whether the email is a
-// Member. See ADR-0005.
-const SENT_MESSAGES: Record<string, string> = {
-  invite: "An email with a login link has been sent.",
-};
+// Member. See ADR-0005. The definite invite-mode confirmation is a full-page
+// panel (checkInbox=1) rendered by the sign-in page, not a toast.
+const SENT_MESSAGES: Record<string, string> = {};
 const SENT_MESSAGE_NEUTRAL =
   "If an account exists for this email, a link was sent.";
 
