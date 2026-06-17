@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { PGlite } from "@electric-sql/pglite";
-import { listMembers } from "@/lib/community/list";
+import { listMembers } from "@/lib/members/list";
 import { createTestDb, pgliteListMembersAdapter, seedMember } from "./db";
 
 describe("listMembers (S1 integration seam)", () => {

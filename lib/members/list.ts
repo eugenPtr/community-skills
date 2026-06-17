@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-// One Member's Community card. Cards carry name, Heart Project and Skills only
+// One Member's card on the Members listing. Cards carry name, Heart Project and Skills only
 // -- location, Passions and Social Links are Profile-page-only (issue #17).
 export interface MemberCard {
   id: string;
@@ -23,7 +23,7 @@ export interface ListMembersClient {
 }
 
 // Every Member as a card, ordered by name ascending, case-insensitive, so the
-// Community is predictable to scan regardless of how names were capitalised.
+// Members listing is predictable to scan regardless of how names were capitalised.
 export async function listMembers(
   client: ListMembersClient,
 ): Promise<MemberCard[]> {

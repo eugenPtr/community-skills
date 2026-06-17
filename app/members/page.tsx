@@ -5,10 +5,10 @@ import {
   listMembers,
   supabaseListMembersClient,
   type MemberCard,
-} from "@/lib/community/list";
+} from "@/lib/members/list";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export default async function CommunityPage() {
+export default async function MembersPage() {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -17,7 +17,7 @@ export default async function CommunityPage() {
 
   // Member gate (issue #17, story 30): only a true Member reads the network.
   // RLS would also return nothing to a non-Member, but redirecting is clearer
-  // than rendering an empty Community.
+  // than rendering an empty Members listing.
   const { data: member } = await supabase
     .from("members")
     .select("id")
@@ -31,7 +31,7 @@ export default async function CommunityPage() {
     <>
       <AuthedMenu />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
-        <h1 className="text-2xl font-semibold">Community</h1>
+        <h1 className="text-2xl font-semibold">Members</h1>
         <p className="mt-1 text-sm text-zinc-600">Everyone in the network.</p>
         <ul className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4">
           {members.map((m) => (

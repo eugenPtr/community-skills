@@ -4,7 +4,7 @@ import { PGlite } from "@electric-sql/pglite";
 import type { InviteRpcClient } from "@/lib/invites/claim";
 import type { InviteValidateClient } from "@/lib/invites/validate";
 import type { OnboardingDbClient } from "@/lib/onboarding/submit";
-import type { ListMembersClient } from "@/lib/community/list";
+import type { ListMembersClient } from "@/lib/members/list";
 import type { GetProfileClient, SocialKey } from "@/lib/profile/get";
 
 // The init migration references `auth.users(id)` because in production
