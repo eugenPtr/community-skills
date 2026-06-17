@@ -4,7 +4,8 @@ import { submitOnboarding } from "@/lib/onboarding/submit";
 import { createTestDb, pgliteOnboardingAdapter, seedUnclaimedInvite } from "./db";
 
 const BASE_PROFILE = {
-  name: "Alice Example",
+  firstName: "Alice",
+  lastName: "Example",
   location: "Bucharest",
   skills: "backend, systems thinking",
   passions: "open-source software",
@@ -44,12 +45,17 @@ describe("submitOnboarding (S1 integration seam)", () => {
     );
     expect(members.rows).toHaveLength(1);
 
-    const profiles = await db.query<{ name: string; heart_project_seeking: boolean }>(
-      `select name, heart_project_seeking from profiles where member_id = $1`,
+    const profiles = await db.query<{
+      first_name: string;
+      last_name: string;
+      heart_project_seeking: boolean;
+    }>(
+      `select first_name, last_name, heart_project_seeking from profiles where member_id = $1`,
       [seeded.userId],
     );
     expect(profiles.rows).toHaveLength(1);
-    expect(profiles.rows[0].name).toBe("Alice Example");
+    expect(profiles.rows[0].first_name).toBe("Alice");
+    expect(profiles.rows[0].last_name).toBe("Example");
     expect(profiles.rows[0].heart_project_seeking).toBe(false);
 
     const invite = await db.query<{ claimed_by: string }>(
@@ -192,7 +198,7 @@ describe("submitOnboarding (S1 integration seam)", () => {
       email: seeded.email,
       code: seeded.code,
       ...BASE_PROFILE,
-      name: "",
+      firstName: "",
     });
 
     expect(result).toEqual({ kind: "missingFields" });

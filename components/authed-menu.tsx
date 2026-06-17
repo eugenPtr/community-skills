@@ -9,7 +9,10 @@ import { signOutAction } from "@/app/auth/sign-out";
 // Profile / Members / Sign out (issue #17). Rendered only in the authed
 // render path of each page, never as a route-group layout, because the home
 // route serves both signed-out and signed-in states.
-export function AuthedMenu() {
+//
+// `isAdmin` reveals the Admin item (the Admin Dashboard entry, issue #20). Each
+// authed page derives it from the caller's member role; non-Admins never see it.
+export function AuthedMenu({ isAdmin = false }: { isAdmin?: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -56,6 +59,15 @@ export function AuthedMenu() {
 
         {open && (
           <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-lg border border-zinc-200 bg-white py-1 shadow-lg">
+            {isAdmin && (
+              <Link
+                href="/admin/dashboard"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
+              >
+                Admin
+              </Link>
+            )}
             <Link
               href="/profile"
               onClick={() => setOpen(false)}

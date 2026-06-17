@@ -23,7 +23,7 @@ export default async function MemberProfilePage({
   // Member gate (story 30): only a true Member reads other Profiles.
   const { data: member } = await supabase
     .from("members")
-    .select("id")
+    .select("id, role")
     .eq("id", user.id)
     .maybeSingle();
   if (!member) redirect("/");
@@ -34,7 +34,7 @@ export default async function MemberProfilePage({
 
   return (
     <>
-      <AuthedMenu />
+      <AuthedMenu isAdmin={member.role === "admin"} />
       <ProfileView profile={profile} isOwn={false} />
     </>
   );
