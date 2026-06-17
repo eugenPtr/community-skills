@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { signOutAction } from "@/app/auth/sign-out";
 
-// The shared navigation on every authed page (home/People Search, Community,
+// The shared navigation on every authed page (home/People Search, Members,
 // any Profile). The app title returns to People Search; the burger menu holds
-// Profile / Community / Sign out (issue #17). Rendered only in the authed
+// Profile / Members / Sign out (issue #17). Rendered only in the authed
 // render path of each page, never as a route-group layout, because the home
 // route serves both signed-out and signed-in states.
 export function AuthedMenu() {
@@ -64,11 +64,11 @@ export function AuthedMenu() {
               Profile
             </Link>
             <Link
-              href="/community"
+              href="/members"
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
             >
-              Community
+              Members
             </Link>
             <form action={signOutAction}>
               <button

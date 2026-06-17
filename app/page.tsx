@@ -9,17 +9,25 @@ export default async function Home() {
     return (
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 px-6 py-16 text-center">
         <h1 className="text-2xl font-semibold">
-          Welcome to the community skills chest
+          Welcome to the skills chest of the Fain Men Community
         </h1>
         <p className="text-sm text-zinc-600">
           This is where you find all the resources to make your project reality
         </p>
-        <Link
-          href="/sign-in"
-          className="rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
-        >
-          Sign in
-        </Link>
+        <div className="flex flex-col items-center gap-3">
+          <Link
+            href="/sign-in"
+            className="rounded bg-purple-600 px-10 py-2  text-white hover:bg-purple-700 "
+          >
+            Enter
+          </Link>
+          <Link
+            href="/join"
+            className="text-sm text-purple-700 underline hover:text-purple-900"
+          >
+            I don't have an account yet
+          </Link>
+        </div>
       </main>
     );
   }
@@ -49,7 +57,7 @@ export default async function Home() {
       <AuthedMenu />
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
         <h1 className="text-2xl font-semibold">
-          Welcome to the community skills chest
+          Welcome to the skills chest of the Fain Men Community
         </h1>
       <p className="text-sm text-zinc-600">
         This is where you find all the resources to make your project reality
