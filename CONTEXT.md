@@ -4,12 +4,22 @@ A private, invite-only network (≤1000 people) where members publish their skil
 projects so others can find the right person to help them. Discovery happens through an
 in-app AI chat that searches over members.
 
+The network is for men who have participated in at least one Man Circle at Camping Fain.
+This is the entry criterion behind every Invite — enforced socially (out of band, by Admins
+deciding who to invite), not by the app.
+
 ## Language
 
 **Member**:
 A person who has completed onboarding with a valid Invite, published their Profile, and
-joined the network. Has full access to the Directory and People Search.
+joined the network. Has full access to the Community and People Search.
 _Avoid_: User, account
+
+**Man Circle**:
+A gathering of men at Camping Fain. Participating in at least one is the real-world
+prerequisite for being invited to the network. Lives entirely off-app; the network never
+records or verifies attendance.
+_Avoid_: meeting, group, session
 
 **Admin**:
 A member with rights to generate invites. Created directly in the database, not via the app.
@@ -53,10 +63,16 @@ A Member either has one (described in their own words) or is still seeking one.
 Published on the profile and searchable alongside skills.
 _Avoid_: Project, initiative, work item
 
-**Directory**:
-The browsable listing of all Members. Every Member can see every other Member's full
-profile here, including social links. Discovery complement to People Search.
-_Avoid_: Roster, member list
+**Community**:
+The whole body of Fain men in the network — the people, not a page. Used in prose and
+headings (e.g. "the Fain Men Community"). For the page that lists them, see Members.
+_Avoid_: using this word for the listing page
+
+**Members** (the page):
+The browsable listing of all Members, shown in alphabetical order. Every Member can see
+every other Member's full profile here, including social links. Discovery complement to
+People Search. Reached via `/members`.
+_Avoid_: Directory, Roster, Community (the listing is not "the Community")
 
 **People Search**:
 The in-app AI chat where a Member asks in natural language for people who can help, and gets
