@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthedMenu } from "@/components/authed-menu";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -44,10 +45,12 @@ export default async function Home() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-      <h1 className="text-2xl font-semibold">
-        Welcome to the community skills chest
-      </h1>
+    <>
+      <AuthedMenu />
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+        <h1 className="text-2xl font-semibold">
+          Welcome to the community skills chest
+        </h1>
       <p className="text-sm text-zinc-600">
         This is where you find all the resources to make your project reality
       </p>
@@ -67,7 +70,8 @@ export default async function Home() {
         >
           Send
         </button>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }
