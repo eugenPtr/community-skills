@@ -19,7 +19,8 @@ export interface SocialsInput {
 export interface OnboardingDbClient extends InviteRpcClient {
   insertProfile(data: {
     memberId: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     location: string;
     skills: string;
     passions: string;
@@ -54,7 +55,8 @@ export async function submitOnboarding(
     userId: string;
     email: string;
     code: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     location: string;
     skills: string;
     passions: string;
@@ -64,7 +66,8 @@ export async function submitOnboarding(
   },
 ): Promise<SubmitOnboardingResult> {
   if (
-    !opts.name.trim() ||
+    !opts.firstName.trim() ||
+    !opts.lastName.trim() ||
     !opts.location.trim() ||
     !opts.skills.trim() ||
     !opts.passions.trim() ||
@@ -84,7 +87,8 @@ export async function submitOnboarding(
 
   const { error } = await client.insertProfile({
     memberId: opts.userId,
-    name: opts.name,
+    firstName: opts.firstName,
+    lastName: opts.lastName,
     location: opts.location,
     skills: opts.skills,
     passions: opts.passions,

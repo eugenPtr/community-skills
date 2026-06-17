@@ -16,7 +16,8 @@ describe("getProfile (S1 integration seam)", () => {
 
   it("returns every field group, with only the Social Links that were set", async () => {
     const id = await seedMember(db, {
-      name: "Maria Pop",
+      firstName: "Maria",
+      lastName: "Pop",
       location: "Cluj-Napoca",
       skills: "carpentry, masonry",
       passions: "timber framing",
@@ -46,7 +47,7 @@ describe("getProfile (S1 integration seam)", () => {
   });
 
   it("returns an empty socials map for a Member who published no Social Links", async () => {
-    const id = await seedMember(db, { name: "No Links" });
+    const id = await seedMember(db, { firstName: "No", lastName: "Links" });
 
     const profile = await getProfile(pgliteGetProfileAdapter(db), id);
 
@@ -54,7 +55,7 @@ describe("getProfile (S1 integration seam)", () => {
   });
 
   it("returns null for an unknown id so a stale link fails cleanly", async () => {
-    await seedMember(db, { name: "Someone" });
+    await seedMember(db, { firstName: "Some", lastName: "One" });
 
     const profile = await getProfile(
       pgliteGetProfileAdapter(db),

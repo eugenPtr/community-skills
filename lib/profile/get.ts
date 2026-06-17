@@ -84,7 +84,7 @@ export function supabaseGetProfileClient(
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "member_id, name, location, skills, passions, heart_project_description, heart_project_seeking",
+          "member_id, first_name, last_name, location, skills, passions, heart_project_description, heart_project_seeking",
         )
         .eq("member_id", memberId)
         .maybeSingle();
@@ -92,7 +92,7 @@ export function supabaseGetProfileClient(
         data: data
           ? {
               id: data.member_id,
-              name: data.name,
+              name: `${data.first_name} ${data.last_name}`,
               location: data.location,
               skills: data.skills,
               passions: data.passions,

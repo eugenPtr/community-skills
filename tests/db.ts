@@ -6,6 +6,8 @@ import type { InviteValidateClient } from "@/lib/invites/validate";
 import type { OnboardingDbClient } from "@/lib/onboarding/submit";
 import type { ListMembersClient } from "@/lib/members/list";
 import type { GetProfileClient, SocialKey } from "@/lib/profile/get";
+import type { ListInvitesClient } from "@/lib/invites/list";
+import type { GenerateInviteClient } from "@/lib/invites/generate";
 
 // The init migration references `auth.users(id)` because in production
 // Supabase owns the auth schema. PGlite doesn't ship with auth, so we
@@ -115,11 +117,12 @@ export function pgliteOnboardingAdapter(db: PGlite): OnboardingDbClient {
       try {
         await db.query(
           `insert into profiles
-             (member_id, name, location, skills, passions, heart_project_description, heart_project_seeking)
-           values ($1, $2, $3, $4, $5, $6, $7)`,
+             (member_id, first_name, last_name, location, skills, passions, heart_project_description, heart_project_seeking)
+           values ($1, $2, $3, $4, $5, $6, $7, $8)`,
           [
             data.memberId,
-            data.name,
+            data.firstName,
+            data.lastName,
             data.location,
             data.skills,
             data.passions,
@@ -172,18 +175,19 @@ export function pgliteListMembersAdapter(db: PGlite): ListMembersClient {
     async fetchMemberCards() {
       const result = await db.query<{
         member_id: string;
-        name: string;
+        first_name: string;
+        last_name: string;
         skills: string;
         heart_project_description: string | null;
         heart_project_seeking: boolean;
       }>(
-        `select member_id, name, skills, heart_project_description, heart_project_seeking
+        `select member_id, first_name, last_name, skills, heart_project_description, heart_project_seeking
            from profiles`,
       );
       return {
         data: result.rows.map((r) => ({
           id: r.member_id,
-          name: r.name,
+          name: `${r.first_name} ${r.last_name}`,
           skills: r.skills,
           heartProjectDescription: r.heart_project_description,
           heartProjectSeeking: r.heart_project_seeking,
@@ -199,14 +203,15 @@ export function pgliteGetProfileAdapter(db: PGlite): GetProfileClient {
     async fetchProfile(memberId) {
       const result = await db.query<{
         member_id: string;
-        name: string;
+        first_name: string;
+        last_name: string;
         location: string;
         skills: string;
         passions: string;
         heart_project_description: string | null;
         heart_project_seeking: boolean;
       }>(
-        `select member_id, name, location, skills, passions,
+        `select member_id, first_name, last_name, location, skills, passions,
                 heart_project_description, heart_project_seeking
            from profiles where member_id = $1`,
         [memberId],
@@ -216,7 +221,7 @@ export function pgliteGetProfileAdapter(db: PGlite): GetProfileClient {
         data: row
           ? {
               id: row.member_id,
-              name: row.name,
+              name: `${row.first_name} ${row.last_name}`,
               location: row.location,
               skills: row.skills,
               passions: row.passions,
@@ -244,8 +249,10 @@ export function pgliteGetProfileAdapter(db: PGlite): GetProfileClient {
 export async function seedMember(
   db: PGlite,
   opts: {
-    name: string;
+    firstName: string;
+    lastName: string;
     email?: string;
+    role?: "member" | "admin";
     location?: string;
     skills?: string;
     passions?: string;
@@ -260,14 +267,19 @@ export async function seedMember(
     id,
     email,
   ]);
-  await db.query(`insert into members (id, email) values ($1, $2)`, [id, email]);
+  await db.query(`insert into members (id, email, role) values ($1, $2, $3)`, [
+    id,
+    email,
+    opts.role ?? "member",
+  ]);
   await db.query(
     `insert into profiles
-       (member_id, name, location, skills, passions, heart_project_description, heart_project_seeking)
-     values ($1, $2, $3, $4, $5, $6, $7)`,
+       (member_id, first_name, last_name, location, skills, passions, heart_project_description, heart_project_seeking)
+     values ($1, $2, $3, $4, $5, $6, $7, $8)`,
     [
       id,
-      opts.name,
+      opts.firstName,
+      opts.lastName,
       opts.location ?? "Bucharest",
       opts.skills ?? "skills",
       opts.passions ?? "passions",
@@ -292,6 +304,90 @@ export async function seedMember(
     );
   }
   return id;
+}
+
+// Adapt PGlite to the invite-listing seam. Left-joins each invite to the
+// claimer's and generator's profile so listInvites can resolve display names;
+// missing joins (PENDING, or a legacy null generator) come back null.
+export function pgliteListInvitesAdapter(db: PGlite): ListInvitesClient {
+  return {
+    async fetchInvites() {
+      const result = await db.query<{
+        code: string;
+        created_at: string | Date;
+        claimed_by: string | null;
+        claimer_first: string | null;
+        claimer_last: string | null;
+        gen_first: string | null;
+        gen_last: string | null;
+      }>(
+        `select i.code, i.created_at, i.claimed_by,
+                c.first_name as claimer_first, c.last_name as claimer_last,
+                g.first_name as gen_first, g.last_name as gen_last
+           from invites i
+           left join profiles c on c.member_id = i.claimed_by
+           left join profiles g on g.member_id = i.generated_by`,
+      );
+      return {
+        data: result.rows.map((r) => ({
+          code: r.code,
+          createdAt: new Date(r.created_at).toISOString(),
+          claimed: r.claimed_by != null,
+          claimerFirstName: r.claimer_first,
+          claimerLastName: r.claimer_last,
+          generatorFirstName: r.gen_first,
+          generatorLastName: r.gen_last,
+        })),
+        error: null,
+      };
+    },
+  };
+}
+
+// Adapt PGlite to the invite-generation seam. Inserts the new code; a duplicate
+// `code` primary key surfaces as a Postgres unique_violation (23505), which is
+// exactly the collision generateInvite retries on.
+export function pgliteGenerateInviteAdapter(db: PGlite): GenerateInviteClient {
+  return {
+    async insertInvite(code, adminId) {
+      try {
+        await db.query(
+          `insert into invites (code, generated_by) values ($1, $2)`,
+          [code, adminId],
+        );
+        return { error: null };
+      } catch (err) {
+        const e = err as { code?: string; message?: string };
+        return {
+          error: { code: e.code, message: e.message ?? String(err) },
+        };
+      }
+    },
+  };
+}
+
+// Seed an invite row with explicit claim/generation/timestamp state, so a list
+// test can build a known mix of PENDING and claimed invites across times.
+export async function seedInvite(
+  db: PGlite,
+  opts: {
+    code: string;
+    createdAt?: string; // ISO; defaults to now()
+    claimedBy?: string | null; // member id, or null for PENDING
+    generatedBy?: string | null; // member id, or null for a legacy invite
+  },
+): Promise<void> {
+  await db.query(
+    `insert into invites (code, claimed_by, claimed_at, generated_by, created_at)
+     values ($1, $2, $3, $4, coalesce($5, now()))`,
+    [
+      opts.code,
+      opts.claimedBy ?? null,
+      opts.claimedBy ? new Date().toISOString() : null,
+      opts.generatedBy ?? null,
+      opts.createdAt ?? null,
+    ],
+  );
 }
 
 // Seed an auth.users row + an unclaimed invite. Returns the user id and

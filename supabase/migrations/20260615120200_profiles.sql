@@ -1,6 +1,7 @@
 create table profiles (
   member_id uuid primary key references members(id) on delete cascade,
-  name text not null,
+  first_name text not null,
+  last_name text not null,
   location text not null,
   skills text not null,
   passions text not null,

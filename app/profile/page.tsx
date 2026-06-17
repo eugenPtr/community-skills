@@ -17,9 +17,17 @@ export default async function OwnProfilePage() {
   // No profile means onboarding never finished; home explains how to resume.
   if (!profile) redirect("/");
 
+  // Role drives the Admin menu item (issue #20); /profile has no other members
+  // lookup, so read it here.
+  const { data: member } = await supabase
+    .from("members")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
   return (
     <>
-      <AuthedMenu />
+      <AuthedMenu isAdmin={member?.role === "admin"} />
       <ProfileView profile={profile} isOwn />
     </>
   );

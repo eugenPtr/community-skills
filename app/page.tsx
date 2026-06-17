@@ -34,7 +34,7 @@ export default async function Home() {
 
   const { data: member } = await supabase
     .from("members")
-    .select("id, email")
+    .select("id, email, role")
     .eq("id", userData.user.id)
     .maybeSingle();
   if (!member) {
@@ -54,7 +54,7 @@ export default async function Home() {
 
   return (
     <>
-      <AuthedMenu />
+      <AuthedMenu isAdmin={member.role === "admin"} />
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
         <h1 className="text-2xl font-semibold">
           Welcome to the skills chest of the Fain Men Community
