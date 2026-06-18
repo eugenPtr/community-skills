@@ -12,7 +12,8 @@ export async function submitOnboardingAction(formData: FormData) {
   }
 
   const code = String(formData.get("invite") ?? "").trim();
-  const name = String(formData.get("name") ?? "").trim();
+  const firstName = String(formData.get("first_name") ?? "").trim();
+  const lastName = String(formData.get("last_name") ?? "").trim();
   const location = String(formData.get("location") ?? "").trim();
   const skills = String(formData.get("skills") ?? "").trim();
   const passions = String(formData.get("passions") ?? "").trim();
@@ -38,7 +39,8 @@ export async function submitOnboardingAction(formData: FormData) {
       async insertProfile(profile) {
         const { error } = await service.from("profiles").upsert({
           member_id: profile.memberId,
-          name: profile.name,
+          first_name: profile.firstName,
+          last_name: profile.lastName,
           location: profile.location,
           skills: profile.skills,
           passions: profile.passions,
@@ -65,7 +67,8 @@ export async function submitOnboardingAction(formData: FormData) {
       userId: data.user.id,
       email: data.user.email,
       code,
-      name,
+      firstName,
+      lastName,
       location,
       skills,
       passions,

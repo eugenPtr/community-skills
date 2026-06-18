@@ -60,7 +60,8 @@ describe("member-readable RLS (live local stack)", () => {
     await service.from("members").insert({ id: memberId, email: MEMBER_EMAIL });
     await service.from("profiles").insert({
       member_id: memberId,
-      name: "RLS Member",
+      first_name: "RLS",
+      last_name: "Member",
       location: "Bucharest",
       skills: "testing",
       passions: "correctness",

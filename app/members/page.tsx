@@ -20,7 +20,7 @@ export default async function MembersPage() {
   // than rendering an empty Members listing.
   const { data: member } = await supabase
     .from("members")
-    .select("id")
+    .select("id, role")
     .eq("id", user.id)
     .maybeSingle();
   if (!member) redirect("/");
@@ -29,7 +29,7 @@ export default async function MembersPage() {
 
   return (
     <>
-      <AuthedMenu />
+      <AuthedMenu isAdmin={member.role === "admin"} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <h1 className="text-2xl font-semibold">Members</h1>
         <p className="mt-1 text-sm text-zinc-600">Everyone in the network.</p>

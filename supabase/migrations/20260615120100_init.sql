@@ -11,6 +11,9 @@ create table invites (
   code text primary key,
   claimed_by uuid references members(id) on delete set null,
   claimed_at timestamptz,
+  -- The Admin who minted this invite (issue #20). Nullable: invites that
+  -- predate the Admin Dashboard have no recorded author and render blank.
+  generated_by uuid references members(id) on delete set null,
   created_at timestamptz not null default now()
 );
 
