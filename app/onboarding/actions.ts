@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabase/server";
 import { submitOnboarding } from "@/lib/onboarding/submit";
+import { embedMember, supabaseEmbedMemberClient } from "@/lib/people-search/embed-member";
+import { gatewayEmbedder } from "@/lib/people-search/ai-gateway";
 
 export async function submitOnboardingAction(formData: FormData) {
   const supabase = await createSupabaseServerClient();
@@ -86,6 +88,18 @@ export async function submitOnboardingAction(formData: FormData) {
   }
   if (result.kind === "invalidCode") {
     redirect(`/sign-in?invite=${encodeURIComponent(code)}`);
+  }
+
+  // Embed the new Member so they are findable in People Search immediately
+  // (story 27). Best-effort: a Gateway hiccup must not fail the join -- the
+  // Profile is already saved and a re-embed can fill the vector in later.
+  try {
+    await embedMember(
+      { embedder: gatewayEmbedder, db: supabaseEmbedMemberClient(service) },
+      data.user.id,
+    );
+  } catch (e) {
+    console.error("embedMember after onboarding failed:", e);
   }
 
   redirect("/");
