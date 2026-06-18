@@ -23,9 +23,15 @@ export default function OnboardingForm({ invite }: { invite: string }) {
       >
         <input type="hidden" name="invite" value={invite} />
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="name" className="text-sm font-medium">Name</label>
-          <input id="name" name="name" required disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
+        <div className="flex gap-4">
+          <div className="flex flex-1 flex-col gap-1">
+            <label htmlFor="first_name" className="text-sm font-medium">First name</label>
+            <input id="first_name" name="first_name" required disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
+          </div>
+          <div className="flex flex-1 flex-col gap-1">
+            <label htmlFor="last_name" className="text-sm font-medium">Last name</label>
+            <input id="last_name" name="last_name" required disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
+          </div>
         </div>
 
         <div className="flex flex-col gap-1">

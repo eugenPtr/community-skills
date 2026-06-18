@@ -282,6 +282,16 @@ const personas: Persona[] = [
   },
 ];
 
+// Split a persona's display name into first/last for the profiles schema. The
+// last whitespace-separated token is the last name; everything before it is the
+// first name, so nickname forms survive (`Iosif "Joe" Marin` -> `Iosif "Joe"` /
+// `Marin`).
+function splitName(name: string): { firstName: string; lastName: string } {
+  const parts = name.trim().split(/\s+/);
+  const lastName = parts.pop() ?? "";
+  return { firstName: parts.join(" "), lastName };
+}
+
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!url || !serviceRoleKey) {
@@ -342,10 +352,12 @@ async function main() {
     const m = await admin.from("members").upsert({ id: memberId, email: p.loginEmail }, { onConflict: "id" });
     if (m.error) throw new Error(`members ${p.loginEmail}: ${m.error.message}`);
 
+    const { firstName, lastName } = splitName(p.name);
     const pr = await admin.from("profiles").upsert(
       {
         member_id: memberId,
-        name: p.name,
+        first_name: firstName,
+        last_name: lastName,
         location: p.location,
         skills: p.skills,
         passions: p.passions,

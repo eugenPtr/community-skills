@@ -44,13 +44,13 @@ export function supabaseListMembersClient(
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "member_id, name, skills, heart_project_description, heart_project_seeking",
+          "member_id, first_name, last_name, skills, heart_project_description, heart_project_seeking",
         );
       return {
         data:
           data?.map((r) => ({
             id: r.member_id,
-            name: r.name,
+            name: `${r.first_name} ${r.last_name}`,
             skills: r.skills,
             heartProjectDescription: r.heart_project_description,
             heartProjectSeeking: r.heart_project_seeking,
