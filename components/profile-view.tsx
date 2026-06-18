@@ -55,41 +55,41 @@ export function ProfileView({
           </span>
         )}
       </div>
-      <p className="mt-1 text-sm text-zinc-600">{profile.location}</p>
+      <p className="mt-1 text-sm text-zinc-300">{profile.location}</p>
 
       <section className="mt-8 space-y-6">
         <div>
-          <h2 className="text-sm font-semibold text-zinc-500">Skills</h2>
-          <p className="mt-1 whitespace-pre-line text-sm text-zinc-800">
+          <h2 className="text-sm font-semibold text-zinc-300">Skills</h2>
+          <p className="mt-1 whitespace-pre-line text-sm text-white">
             {profile.skills}
           </p>
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-zinc-500">Passions</h2>
-          <p className="mt-1 whitespace-pre-line text-sm text-zinc-800">
+          <h2 className="text-sm font-semibold text-zinc-300">Passions</h2>
+          <p className="mt-1 whitespace-pre-line text-sm text-white">
             {profile.passions}
           </p>
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-zinc-500">Heart Project</h2>
-          <p className="mt-1 whitespace-pre-line text-sm text-zinc-800">
+          <h2 className="text-sm font-semibold text-zinc-300">Heart Project</h2>
+          <p className="mt-1 whitespace-pre-line text-sm text-white">
             {heartProject}
           </p>
         </div>
 
         {socialEntries.length > 0 && (
           <div>
-            <h2 className="text-sm font-semibold text-zinc-500">Reach them</h2>
+            <h2 className="text-sm font-semibold text-zinc-300">Reach them</h2>
             <ul className="mt-1 space-y-1">
               {socialEntries.map(({ key, value }) => {
                 const href = socialHref(key, value);
                 return (
-                  <li key={key} className="text-sm text-zinc-800">
-                    <span className="text-zinc-500">{SOCIAL_LABELS[key]}: </span>
+                  <li key={key} className="text-sm text-white">
+                    <span className="text-zinc-300">{SOCIAL_LABELS[key]}: </span>
                     {href ? (
                       <a
                         href={href}
-                        className="text-purple-700 hover:underline"
+                        className="text-white underline hover:text-zinc-300"
                         target={key === "phone" || key === "email" ? undefined : "_blank"}
                         rel="noreferrer"
                       >
