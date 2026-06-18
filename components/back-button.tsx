@@ -28,7 +28,7 @@ export function BackButton({
     <button
       type="button"
       onClick={goBack}
-      className="inline-flex items-center gap-1 text-sm text-zinc-600 hover:text-zinc-900"
+      className="inline-flex items-center gap-1 text-sm text-zinc-300 hover:text-white"
     >
       <span aria-hidden>←</span>
       {label}
