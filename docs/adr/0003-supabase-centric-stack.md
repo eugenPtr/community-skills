@@ -1,5 +1,11 @@
 # Supabase-centric stack with a single external LLM key
 
+> **Embedding decision superseded by ADR-0008.** The `gte-small` in-stack embedding choice
+> below was reversed once we confirmed all member content is Romanian (gte-small is
+> English-centric). Embeddings now run on OpenAI `text-embedding-3-small` via the Vercel AI
+> Gateway. The rest of this ADR (Supabase for auth/Postgres/pgvector/RLS, one external key)
+> still holds — the Gateway preserves the single-key goal.
+
 Auth (magic-link), Postgres, pgvector, RLS, **and embeddings** all live in Supabase.
 Embeddings are computed in-stack with Supabase's built-in `gte-small` model via Edge
 Functions. The only external AI vendor is Anthropic (Claude Haiku 4.5) for generating

@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { AuthedMenu } from "@/components/authed-menu";
+import { BackButton } from "@/components/back-button";
 import { ProfileView } from "@/components/profile-view";
 import { getProfile, supabaseGetProfileClient } from "@/lib/profile/get";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -35,6 +36,11 @@ export default async function MemberProfilePage({
   return (
     <>
       <AuthedMenu isAdmin={member.role === "admin"} />
+      <div className="mx-auto w-full max-w-2xl px-6 pt-6">
+        {/* Reached from a Conversation, the Directory, etc. -- back returns there;
+            on a direct load it falls back to the Directory. */}
+        <BackButton fallbackHref="/members" />
+      </div>
       <ProfileView profile={profile} isOwn={false} />
     </>
   );

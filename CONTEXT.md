@@ -84,3 +84,9 @@ _Avoid_: Directory, Roster, Community (the listing is not "the Community")
 The in-app AI chat where a Member asks in natural language for people who can help, and gets
 back matching Members with reasons. Powered by vector search over profiles + an LLM.
 _Avoid_: ChatGPT, the bot, assistant
+
+**Conversation**:
+A single People Search thread between a Member and the AI: an ordered exchange of messages,
+saved and revisitable from the sidebar. Capped at 10 Member messages and retained for 90
+days, after which it is deleted. Reached via `/chat/[id]`.
+_Avoid_: Chat, thread, session, history

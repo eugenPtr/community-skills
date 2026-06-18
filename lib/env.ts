@@ -16,4 +16,10 @@ export const env = {
   get supabaseServiceRoleKey(): string {
     return required("SUPABASE_SERVICE_ROLE_KEY");
   },
+  // The single credential for both embeddings and answers via the Vercel AI
+  // Gateway (ADR-0008). Managed with `vercel env`, pulled locally with
+  // `vercel env pull`.
+  get aiGatewayApiKey(): string {
+    return required("AI_GATEWAY_API_KEY");
+  },
 };

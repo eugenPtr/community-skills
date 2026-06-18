@@ -22,3 +22,12 @@ Stack is Supabase + Vercel (ADR-0003). Every change to these must go through the
 # UI feedback
 
 - All transient feedback to the user — errors and confirmations alike — is shown as a **toast** (`sonner`), not inline `<p>` markup. `<Toaster />` is mounted once in `app/layout.tsx`; server actions pass feedback via a redirect query param (`?error=` / `?sent=`) that a client component reads, surfaces as a toast, then strips from the URL. Default duration 5s.
+
+# Navigation
+
+- Back affordances use the reusable `<BackButton>` component (history-aware: `router.back()` when in-app history exists, else navigates to `fallbackHref`). Don't hand-roll `router.back()` per page.
+
+# People Search (AI)
+
+- Embeddings and LLM answers both go through the **Vercel AI Gateway** (one key, `AI_GATEWAY_API_KEY`) — see ADR-0008. Embeddings: `openai/text-embedding-3-small` (1536-dim). Answers: `claude-haiku-4-5`. Never wire providers directly.
+- One combined embedding per Member, built by a single `buildEmbeddingInput` helper (skills + heart project + passions) and written by the `embedMember(id)` primitive — reused by onboarding save, profile edit, the seed loop, and backfill.

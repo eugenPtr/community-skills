@@ -30,6 +30,8 @@
  *   heart_project_description ← persona Project #1 (heart_project_seeking = false)
  */
 import { createClient } from "@supabase/supabase-js";
+import { embedMember, supabaseEmbedMemberClient } from "@/lib/people-search/embed-member";
+import { gatewayEmbedder } from "@/lib/people-search/ai-gateway";
 
 type Socials = {
   phone?: string;
@@ -382,6 +384,14 @@ async function main() {
       { onConflict: "member_id" },
     );
     if (s.error) throw new Error(`socials ${p.loginEmail}: ${s.error.message}`);
+
+    // Embed the persona so People Search is testable end-to-end straight after a
+    // reset (story 29). This is the one place a reset reaches the network -- the
+    // real Gateway embed -- so it needs AI_GATEWAY_API_KEY in the env file.
+    await embedMember(
+      { embedder: gatewayEmbedder, db: supabaseEmbedMemberClient(admin) },
+      memberId,
+    );
 
     console.log(`✓ ${p.name} <${p.loginEmail}> ${before ? "(reused)" : "(created)"} ${memberId}`);
   }
