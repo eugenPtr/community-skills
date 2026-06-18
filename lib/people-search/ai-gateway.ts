@@ -29,12 +29,13 @@ export const gatewayEmbedder: Embedder = async (input: string) => {
 export const answerModel = gateway(ANSWER_MODEL);
 
 // Compose the model messages for a People Search turn from the orchestrator's
-// request: the strict system prompt, recent Conversation history, and a final
-// user turn that pins the candidate list to the question. streamText/generateText
-// in the route consume these.
+// request: recent Conversation history plus a final user turn that pins the
+// candidate list to the question. The strict system prompt is passed via
+// streamText's dedicated `system` option (req.system), not as a message --
+// keeping the trusted instructions out of the message stream (AI SDK best
+// practice; avoids the system-in-messages prompt-injection warning).
 export function buildAnswerMessages(req: GenerationRequest): ModelMessage[] {
   return [
-    { role: "system", content: req.system },
     ...req.history.map((m) => ({ role: m.role, content: m.content })),
     { role: "user", content: `${req.contextBlock}\n\nÎntrebare: ${req.query}` },
   ];

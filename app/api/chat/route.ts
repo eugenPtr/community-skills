@@ -87,6 +87,7 @@ export async function POST(req: Request) {
       generate: (request) =>
         streamText({
           model: answerModel,
+          system: request.system,
           messages: buildAnswerMessages(request),
           onFinish: async ({ text }) => {
             await addMessage(conversations, {
