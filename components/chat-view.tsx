@@ -23,7 +23,7 @@ const markdownComponents: MarkdownComponents = {
       return (
         <a
           href={href}
-          className="font-medium text-purple-700 underline hover:text-purple-900"
+          className="font-medium text-white underline hover:text-zinc-300"
         >
           {children}
         </a>
