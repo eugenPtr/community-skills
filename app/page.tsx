@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthedMenu } from "@/components/authed-menu";
+import { startConversation } from "@/app/chat/actions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -63,22 +64,25 @@ export default async function Home() {
         This is where you find all the resources to make your project reality
       </p>
       <p className="mt-4 text-sm font-medium">Say what you need</p>
-      <div className="flex w-full items-end gap-2 rounded-2xl border border-zinc-300 bg-white p-3">
+      <form
+        action={startConversation}
+        className="flex w-full items-end gap-2 rounded-2xl border border-zinc-300 bg-white p-3"
+      >
         <textarea
+          name="q"
           rows={3}
-          disabled
+          required
           placeholder="I want to build a house with natural materials. Who in the community can help me?"
-          className="flex-1 resize-none bg-transparent text-sm text-left outline-none placeholder:text-zinc-400 disabled:cursor-not-allowed"
+          className="flex-1 resize-none bg-transparent text-sm text-left outline-none placeholder:text-zinc-400"
         />
         <button
-          type="button"
-          disabled
+          type="submit"
           aria-label="Send"
           className="rounded-lg bg-purple-600 px-4 py-2 text-white disabled:opacity-50 hover:bg-purple-700"
         >
           Send
         </button>
-        </div>
+      </form>
       </main>
     </>
   );
