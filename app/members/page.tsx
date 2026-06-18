@@ -32,7 +32,6 @@ export default async function MembersPage() {
       <AuthedMenu isAdmin={member.role === "admin"} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <h1 className="text-2xl font-semibold">Members</h1>
-        <p className="mt-1 text-sm text-zinc-600">Everyone in the network.</p>
         <ul className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4">
           {members.map((m) => (
             <Card key={m.id} member={m} isOwn={m.id === user.id} />
@@ -55,19 +54,19 @@ function Card({ member, isOwn }: { member: MemberCard; isOwn: boolean }) {
     <li>
       <Link
         href={href}
-        className="flex h-full flex-col rounded-xl border border-zinc-200 bg-white p-4 transition hover:border-zinc-300 hover:shadow-sm"
+        className="flex h-full flex-col rounded-xl border border-zinc-600 bg-zinc-700 p-4 transition hover:border-zinc-500 hover:shadow-sm"
       >
-        <h2 className="font-semibold">{member.name}</h2>
-        <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+        <h2 className="font-semibold text-white">{member.name}</h2>
+        <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
           Heart Project
         </p>
-        <p className="mt-0.5 line-clamp-3 text-sm text-zinc-700">
+        <p className="mt-0.5 line-clamp-3 text-sm text-white">
           {heartProject}
         </p>
-        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-zinc-300">
           Skills
         </p>
-        <p className="mt-0.5 line-clamp-3 text-sm text-zinc-700">
+        <p className="mt-0.5 line-clamp-3 text-sm text-white">
           {member.skills}
         </p>
       </Link>

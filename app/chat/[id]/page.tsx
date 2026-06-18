@@ -57,14 +57,16 @@ export default async function ChatPage({
   return (
     <>
       <AuthedMenu />
-      <div className="mx-auto flex h-[calc(100vh-3.5rem)] w-full max-w-5xl flex-1">
+      <div className="flex h-[calc(100vh-3.5rem)] w-full flex-1">
         <ConversationSidebar conversations={summaries} activeId={id} />
-        <main className="flex-1">
-          <ChatView
-            conversationId={id}
-            initialMessages={initialMessages}
-            initialQuery={q}
-          />
+        <main className="flex flex-1 justify-center">
+          <div className="flex h-full w-full max-w-3xl flex-col">
+            <ChatView
+              conversationId={id}
+              initialMessages={initialMessages}
+              initialQuery={q}
+            />
+          </div>
         </main>
       </div>
     </>
