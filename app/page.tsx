@@ -66,14 +66,14 @@ export default async function Home() {
       <p className="mt-4 text-sm font-medium">Say what you need</p>
       <form
         action={startConversation}
-        className="flex w-full items-end gap-2 rounded-2xl border border-zinc-300 bg-white p-3"
+        className="flex w-full items-end gap-2 rounded-2xl border border-zinc-600 bg-zinc-700 p-3"
       >
         <textarea
           name="q"
           rows={3}
           required
           placeholder="I want to build a house with natural materials. Who in the community can help me?"
-          className="flex-1 resize-none bg-transparent text-sm text-left outline-none placeholder:text-zinc-400"
+          className="flex-1 resize-none bg-transparent text-sm text-left text-white outline-none placeholder:text-zinc-400"
         />
         <button
           type="submit"
