@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { AuthedMenu } from "@/components/authed-menu";
+import { ConversationSidebar } from "@/components/conversation-sidebar";
 import { startConversation } from "@/app/chat/actions";
+import { supabaseConversationsClient } from "@/lib/people-search/conversations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -12,7 +14,7 @@ export default async function Home() {
         <h1 className="text-2xl font-semibold">
           Welcome to the skills chest of the Fain Men Community
         </h1>
-        <p className="text-sm text-zinc-600">
+        <p className="text-sm">
           This is where you find all the resources to make your project reality
         </p>
         <div className="flex flex-col items-center gap-3">
@@ -53,14 +55,18 @@ export default async function Home() {
     );
   }
 
-  return (
+  // Past Conversations open the sidebar on the home route too (always visible
+  // on desktop). With none yet, home stays the plain welcome hero.
+  const summaries = await supabaseConversationsClient(supabase).listConversations(
+    member.id,
+  );
+
+  const hero = (
     <>
-      <AuthedMenu isAdmin={member.role === "admin"} />
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-        <h1 className="text-2xl font-semibold">
-          Welcome to the skills chest of the Fain Men Community
-        </h1>
-      <p className="text-sm text-zinc-600">
+      <h1 className="text-2xl font-semibold">
+        Welcome to the skills chest of the Fain Men Community
+      </h1>
+      <p className="text-sm">
         This is where you find all the resources to make your project reality
       </p>
       <p className="mt-4 text-sm font-medium">Say what you need</p>
@@ -83,7 +89,31 @@ export default async function Home() {
           Send
         </button>
       </form>
-      </main>
+    </>
+  );
+
+  if (summaries.length === 0) {
+    return (
+      <>
+        <AuthedMenu isAdmin={member.role === "admin"} />
+        <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+          {hero}
+        </main>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <AuthedMenu isAdmin={member.role === "admin"} />
+      <div className="flex h-[calc(100vh-3.5rem)] w-full flex-1">
+        <ConversationSidebar conversations={summaries} activeId="" />
+        <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+          <div className="flex w-full max-w-2xl flex-col items-center gap-4">
+            {hero}
+          </div>
+        </main>
+      </div>
     </>
   );
 }

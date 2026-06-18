@@ -53,7 +53,7 @@ export function ConversationSidebar({
       </button>
 
       {/* Desktop: always-visible column. */}
-      <aside className="hidden w-64 shrink-0 border-r border-zinc-800 md:block">
+      <aside className="hidden w-48 shrink-0 border-r border-zinc-800 md:block">
         {list}
       </aside>
 
@@ -66,7 +66,7 @@ export function ConversationSidebar({
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-black/30"
           />
-          <div className="absolute left-0 top-0 h-full w-64 bg-zinc-900 shadow-xl">
+          <div className="absolute left-0 top-0 h-full w-48 bg-zinc-900 shadow-xl">
             {list}
           </div>
         </div>

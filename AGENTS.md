@@ -4,6 +4,18 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+# Git workflow
+
+- Every new piece of work — feature, fix, chore, style, docs, etc. — starts on a **fresh branch cut from `origin/main`**, never from whatever branch happens to be checked out. Fetch first so you branch from the current remote tip:
+
+  ```sh
+  git fetch origin
+  git switch -c <type>/<short-desc> origin/main
+  ```
+
+- Branch name is `<type>/<short-desc>`, where `<type>` matches the Conventional Commit types used in this repo (`feat`, `fix`, `chore`, `style`, `docs`, …) and `<short-desc>` is kebab-case (e.g. `feat/people-search`, `fix/invite-claim-race`).
+- Never commit directly to `main`.
+
 # Tooling
 
 Stack is Supabase + Vercel (ADR-0003). Every change to these must go through their CLI so it is reproducible, reviewable, and in git. **No manual dashboard changes** — the dashboard is read-only for inspection.

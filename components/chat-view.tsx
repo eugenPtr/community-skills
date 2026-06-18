@@ -142,7 +142,7 @@ export function ChatView({
                 onClick={submit}
                 disabled={busy || !input.trim()}
                 aria-label="Trimite"
-                className="rounded-lg bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
+                className="rounded-lg bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
               >
                 Trimite
               </button>
