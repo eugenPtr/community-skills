@@ -28,8 +28,8 @@ export function AuthedMenu({ isAdmin = false }: { isAdmin?: boolean }) {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 bg-white/90 px-4 py-3 backdrop-blur">
-      <Link href="/" className="text-sm font-semibold">
+    <header className="sticky top-0 z-10 flex items-center justify-between bg-background px-4 py-3">
+      <Link href="/" className="text-sm font-semibold text-white">
         Community skills chest
       </Link>
 
@@ -39,7 +39,7 @@ export function AuthedMenu({ isAdmin = false }: { isAdmin?: boolean }) {
           aria-label="Menu"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="flex h-9 w-9 items-center justify-center rounded-md text-zinc-700 hover:bg-zinc-100"
+          className="flex h-9 w-9 items-center justify-center rounded-md text-white hover:bg-white/10"
         >
           <svg
             width="20"
@@ -58,12 +58,12 @@ export function AuthedMenu({ isAdmin = false }: { isAdmin?: boolean }) {
         </button>
 
         {open && (
-          <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-lg border border-zinc-200 bg-white py-1 shadow-lg">
+          <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-800 py-1 shadow-lg">
             {isAdmin && (
               <Link
                 href="/admin/dashboard"
                 onClick={() => setOpen(false)}
-                className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
+                className="block px-4 py-2 text-sm text-zinc-100 hover:bg-zinc-700"
               >
                 Admin
               </Link>
@@ -71,21 +71,21 @@ export function AuthedMenu({ isAdmin = false }: { isAdmin?: boolean }) {
             <Link
               href="/profile"
               onClick={() => setOpen(false)}
-              className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
+              className="block px-4 py-2 text-sm text-zinc-100 hover:bg-zinc-700"
             >
               Profile
             </Link>
             <Link
               href="/members"
               onClick={() => setOpen(false)}
-              className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
+              className="block px-4 py-2 text-sm text-zinc-100 hover:bg-zinc-700"
             >
               Members
             </Link>
             <form action={signOutAction}>
               <button
                 type="submit"
-                className="block w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-100"
+                className="block w-full px-4 py-2 text-left text-sm text-zinc-100 hover:bg-zinc-700"
               >
                 Sign out
               </button>

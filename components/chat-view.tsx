@@ -96,7 +96,7 @@ export function ChatView({
             </div>
           ) : (
             <div key={message.id} className="flex justify-start">
-              <div className="prose prose-sm max-w-[80%] rounded-2xl bg-zinc-100 px-4 py-2 text-sm text-zinc-900">
+              <div className="prose prose-invert prose-sm max-w-[80%] rounded-2xl bg-zinc-700 px-4 py-2 text-sm text-white">
                 <Streamdown components={markdownComponents}>
                   {messageText(message)}
                 </Streamdown>
@@ -112,9 +112,9 @@ export function ChatView({
         <div ref={endRef} />
       </div>
 
-      <div className="border-t border-zinc-200 bg-white px-4 py-3">
+      <div className="border-t border-zinc-800 bg-background px-4 py-3">
         {atCap ? (
-          <p className="text-center text-sm text-zinc-600">
+          <p className="text-center text-sm text-zinc-300">
             Ai atins limita de {MEMBER_MESSAGE_CAP} mesaje.{" "}
             <Link href="/" className="text-purple-700 underline">
               Începe o conversație nouă
@@ -123,7 +123,7 @@ export function ChatView({
           </p>
         ) : (
           <>
-            <div className="flex w-full items-end gap-2 rounded-2xl border border-zinc-300 bg-white p-3">
+            <div className="flex w-full items-end gap-2 rounded-2xl border border-zinc-600 bg-zinc-700 p-3">
               <textarea
                 rows={2}
                 value={input}
@@ -135,7 +135,7 @@ export function ChatView({
                   }
                 }}
                 placeholder="Spune ce ai nevoie…"
-                className="flex-1 resize-none bg-transparent text-sm outline-none placeholder:text-zinc-400"
+                className="flex-1 resize-none bg-transparent text-sm text-white outline-none placeholder:text-zinc-400"
               />
               <button
                 type="button"

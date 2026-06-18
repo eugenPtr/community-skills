@@ -29,10 +29,10 @@ export function ConversationSidebar({
           key={c.id}
           href={`/chat/${c.id}`}
           onClick={() => setOpen(false)}
-          className={`truncate rounded-lg px-3 py-2 text-sm ${
+          className={`truncate rounded-lg px-3 py-2 text-sm text-white ${
             c.id === activeId
-              ? "bg-zinc-200 font-medium text-zinc-900"
-              : "text-zinc-700 hover:bg-zinc-100"
+              ? "bg-zinc-700 font-medium"
+              : "hover:bg-zinc-800"
           }`}
         >
           {c.title?.trim() || "Conversație fără titlu"}
@@ -47,13 +47,13 @@ export function ConversationSidebar({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="m-3 inline-flex items-center gap-1 self-start rounded-lg border border-zinc-300 px-3 py-1.5 text-sm md:hidden"
+        className="m-3 inline-flex items-center gap-1 self-start rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-white md:hidden"
       >
         ☰ Conversații
       </button>
 
       {/* Desktop: always-visible column. */}
-      <aside className="hidden w-64 shrink-0 border-r border-zinc-200 md:block">
+      <aside className="hidden w-64 shrink-0 border-r border-zinc-800 md:block">
         {list}
       </aside>
 
@@ -66,7 +66,7 @@ export function ConversationSidebar({
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-black/30"
           />
-          <div className="absolute left-0 top-0 h-full w-64 bg-white shadow-xl">
+          <div className="absolute left-0 top-0 h-full w-64 bg-zinc-900 shadow-xl">
             {list}
           </div>
         </div>
