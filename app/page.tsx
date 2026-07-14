@@ -12,10 +12,10 @@ export default async function Home() {
     return (
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 px-6 py-16 text-center">
         <h1 className="text-2xl font-semibold">
-          Bine ai venit în cufarul cu abilități a Comunității Fain Men
+          Bun venit, barbate! 
         </h1>
         <p className="text-sm">
-          Aici găsești toate resursele ca să-ți transformi proiectul în realitate
+          Aici găsești toate resursele comunitatii. Vezi cine iti poate aduce valoare in proiectele la care lucrezi
         </p>
         <div className="flex flex-col items-center gap-3">
           <Link
@@ -64,10 +64,10 @@ export default async function Home() {
   const hero = (
     <>
       <h1 className="text-2xl font-semibold">
-        Bine ai venit în cufarul cu abilități a Comunității de Barbati 
+        Salut, barbate!
       </h1>
       <p className="text-sm">
-        Aici găsești toate resursele ca să-ți transformi proiectul în realitate
+        Aici găsești toate resursele comunitatii
       </p>
       <p className="mt-4 text-sm font-medium">Spune ce ai nevoie</p>
       <form
