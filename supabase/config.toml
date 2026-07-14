@@ -144,9 +144,14 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "https://community-skills-9zdmdfwkw-eugens-projects-b22c94d9.vercel.app"
+site_url = "https://community-skills.vercel.app"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
+# The production alias must be listed explicitly: it does not match the
+# `*-eugens-projects-*` deployment-URL pattern, and an un-allow-listed
+# `emailRedirectTo` is silently replaced by `site_url` — which is how magic
+# links ended up pointing at a stale immutable deployment.
 additional_redirect_urls = [
+  "https://community-skills.vercel.app/**",
   "https://*-eugens-projects-b22c94d9.vercel.app/**",
   "http://localhost:3000/**",
   "http://127.0.0.1:3000/**",
