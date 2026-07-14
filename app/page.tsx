@@ -12,23 +12,23 @@ export default async function Home() {
     return (
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 px-6 py-16 text-center">
         <h1 className="text-2xl font-semibold">
-          Welcome to the skills chest of the Fain Men Community
+          Bine ai venit în cufarul cu abilități a Comunității Fain Men
         </h1>
         <p className="text-sm">
-          This is where you find all the resources to make your project reality
+          Aici găsești toate resursele ca să-ți transformi proiectul în realitate
         </p>
         <div className="flex flex-col items-center gap-3">
           <Link
             href="/sign-in"
             className="rounded bg-purple-600 px-10 py-2  text-white hover:bg-purple-700 "
           >
-            Enter
+            Intră
           </Link>
           <Link
             href="/join"
             className="text-sm text-purple-700 underline hover:text-purple-900"
           >
-            I don't have an account yet
+            Încă nu am cont
           </Link>
         </div>
       </main>
@@ -46,10 +46,10 @@ export default async function Home() {
     // point them back to their Invite link, which carries it.
     return (
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
-        <h1 className="text-2xl font-semibold">Finish joining</h1>
+        <h1 className="text-2xl font-semibold">Finalizează înscrierea</h1>
         <p className="text-sm text-zinc-600">
-          You haven't completed onboarding yet. Open your invite link again to
-          pick up where you left off.
+          Încă nu ți-ai finalizat înscrierea. Deschide din nou linkul de
+          invitație ca să continui de unde ai rămas.
         </p>
       </main>
     );
@@ -64,12 +64,12 @@ export default async function Home() {
   const hero = (
     <>
       <h1 className="text-2xl font-semibold">
-        Welcome to the skills chest of the Fain Men Community
+        Bine ai venit în cufarul cu abilități a Comunității de Barbati 
       </h1>
       <p className="text-sm">
-        This is where you find all the resources to make your project reality
+        Aici găsești toate resursele ca să-ți transformi proiectul în realitate
       </p>
-      <p className="mt-4 text-sm font-medium">Say what you need</p>
+      <p className="mt-4 text-sm font-medium">Spune ce ai nevoie</p>
       <form
         action={startConversation}
         className="flex w-full items-end gap-2 rounded-2xl border border-zinc-600 bg-zinc-700 p-3"
@@ -78,15 +78,15 @@ export default async function Home() {
           name="q"
           rows={3}
           required
-          placeholder="I want to build a house with natural materials. Who in the community can help me?"
+          placeholder="Vreau să construiesc o casă din materiale naturale. Cine din comunitate mă poate ajuta?"
           className="flex-1 resize-none bg-transparent text-sm text-left text-white outline-none placeholder:text-zinc-400"
         />
         <button
           type="submit"
-          aria-label="Send"
+          aria-label="Trimite"
           className="rounded-lg bg-purple-600 px-4 py-2 text-white disabled:opacity-50 hover:bg-purple-700"
         >
-          Send
+          Trimite
         </button>
       </form>
     </>

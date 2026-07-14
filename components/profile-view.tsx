@@ -4,9 +4,9 @@ import { type MemberProfile, type SocialKey } from "@/lib/profile/get";
 // `isOwn` only adds the owner marker (and the future edit affordance); it never
 // changes the data shown (issue #17).
 const SOCIAL_LABELS: Record<SocialKey, string> = {
-  phone: "Phone",
-  email: "Contact email",
-  website: "Website",
+  phone: "Telefon",
+  email: "Email de contact",
+  website: "Site web",
   linkedin: "LinkedIn",
   facebook: "Facebook",
   instagram: "Instagram",
@@ -38,7 +38,7 @@ export function ProfileView({
   isOwn: boolean;
 }) {
   const heartProject = profile.heartProjectSeeking
-    ? "Seeking one"
+    ? "În căutare"
     : profile.heartProjectDescription;
   const socialEntries = SOCIAL_ORDER.flatMap((key) => {
     const value = profile.socials[key];
@@ -51,7 +51,7 @@ export function ProfileView({
         <h1 className="text-2xl font-semibold">{profile.name}</h1>
         {isOwn && (
           <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
-            You
+            Tu
           </span>
         )}
       </div>
@@ -59,19 +59,19 @@ export function ProfileView({
 
       <section className="mt-8 space-y-6">
         <div>
-          <h2 className="text-sm font-semibold text-zinc-300">Skills</h2>
+          <h2 className="text-sm font-semibold text-zinc-300">Abilități</h2>
           <p className="mt-1 whitespace-pre-line text-sm text-white">
             {profile.skills}
           </p>
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-zinc-300">Passions</h2>
+          <h2 className="text-sm font-semibold text-zinc-300">Pasiuni</h2>
           <p className="mt-1 whitespace-pre-line text-sm text-white">
             {profile.passions}
           </p>
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-zinc-300">Heart Project</h2>
+          <h2 className="text-sm font-semibold text-zinc-300">Proiect de Suflet</h2>
           <p className="mt-1 whitespace-pre-line text-sm text-white">
             {heartProject}
           </p>
@@ -79,7 +79,7 @@ export function ProfileView({
 
         {socialEntries.length > 0 && (
           <div>
-            <h2 className="text-sm font-semibold text-zinc-300">Reach them</h2>
+            <h2 className="text-sm font-semibold text-zinc-300">Contact</h2>
             <ul className="mt-1 space-y-1">
               {socialEntries.map(({ key, value }) => {
                 const href = socialHref(key, value);

@@ -56,231 +56,231 @@ type Persona = {
 const personas: Persona[] = [
   {
     loginEmail: "ana.dumitrescu@example.com",
-    name: "Ana Dumitrescu",
-    location: "Bucharest, Romania",
+    name: "Andrei Dumitrescu",
+    location: "București, România",
     skills:
-      "Designs reliable backends and data pipelines — Postgres schema design, event-driven services, ETL, and analytics infrastructure. Strong on scaling read-heavy systems and getting clean, queryable data out of messy sources.",
+      "Construiesc backend-uri solide și fluxuri de date — proiectez scheme Postgres, servicii event-driven, ETL și infrastructură de analiză. Mă pricep să scot date curate și ușor de interogat din surse haotice.",
     passions:
-      "Loses track of time untangling a gnarly data model until it finally clicks; quietly thrilled when a query that used to take minutes returns instantly.",
+      "Pot să pierd ore întregi descurcând un model de date complicat, până se așază totul la locul lui; mă bucur sincer când o interogare care dura minute se întoarce instant.",
     heartProject:
-      "Self-serve data platform — building infrastructure so any team can get clean, trustworthy data without waiting on an engineer.",
-    socials: { website: "github.com/anad", linkedin: "linkedin.com/in/anadumitrescu" },
+      "Vreau să construiesc o platformă unde orice echipă să-și ia datele curate singură, fără să aștepte un inginer.",
+    socials: { website: "github.com/andreid", linkedin: "linkedin.com/in/andreidumitrescu" },
   },
   {
     loginEmail: "iosif.marin@example.com",
     name: 'Iosif "Joe" Marin',
-    location: "Timișoara, Romania",
+    location: "Timișoara, România",
     skills:
-      "Builds homes fast and precise with modern materials — steel framing, structural concrete, prefab panels, energy-efficient insulation. Specializes in tight timelines and code-compliant, low-maintenance structures.",
+      "Construiesc case cu materiale moderne — structuri metalice, beton structural, panouri prefabricate și izolație eficientă energetic. Lucrez îngrijit, după cod, și prind drag de fiecare detaliu structural greu pe care reușesc să-l rezolv curat.",
     passions:
-      "Comes alive on site at first light, watching a precise frame go up exactly to plan; energized by cracking a tricky structural detail.",
+      "Prind viață pe șantier în zori, privind cum se ridică o structură exact după plan; mă încarcă un detaliu structural greu care se așază în sfârșit.",
     heartProject:
-      "Net-zero homes at speed — on a mission to make low-energy, code-compliant homes buildable in a single season at normal cost.",
+      "Vreau să fac case cu consum aproape zero de energie, pe care să și le permită oamenii obișnuiți.",
     socials: { phone: "+40 712 345 678", website: "joemarin.build", instagram: "instagram.com/joebuilds" },
   },
   {
     loginEmail: "bogdan.craciun@example.com",
     name: 'Bogdan "Bob" Crăciun',
-    location: "Brașov, Romania",
+    location: "Brașov, România",
     skills:
-      "Builds with natural and traditional materials — timber framing, cob, lime plaster, straw-bale, reclaimed stone. Focuses on breathable, healthy, low-impact homes and restoring old buildings the way they were made.",
+      "Construiesc cu materiale naturale și tradiționale — lemn, cob, tencuială de var, baloți de paie, piatră recuperată. Mă dedic caselor sănătoase, care respiră, și restaurării clădirilor vechi așa cum au fost făcute.",
     passions:
-      "Most present with his hands in lime and timber, shaping a wall that breathes; finds flow in the slow, tactile rhythm of natural building.",
+      "Sunt cel mai prezent cu mâinile în var și lemn, modelând un perete care respiră; găsesc liniște în ritmul lent și tactil al construcției naturale.",
     heartProject:
-      "Homes that breathe — working toward houses built entirely from natural, breathable materials that are good for the people in them and the land.",
+      "Vreau să construiesc case făcute doar din materiale naturale, care respiră și fac bine oamenilor din ele.",
     socials: { website: "craciunnatural.ro", facebook: "facebook.com/craciunnatural", instagram: "instagram.com/bobnatural" },
   },
   {
     loginEmail: "lucia.ferraro@example.com",
-    name: "Lucia Ferraro",
-    location: "Lisbon, Portugal",
+    name: "Liviu Fărcaș",
+    location: "Cluj-Napoca, România",
     skills:
-      "Works across installation, collage, and public art — turns spaces and found materials into immersive pieces. Collaborates with communities to co-create work and is comfortable scoping commissions from concept to install.",
+      "Lucrez în instalație, colaj și artă publică — transform spații și materiale găsite în lucrări în care poți intra. Creez împreună cu comunitatea și duc o comandă de la concept până la montaj.",
     passions:
-      "Lights up when a raw space and a pile of found materials start becoming something alive; thrives in the messy middle of making.",
+      "Mă luminez când un spațiu gol și o grămadă de materiale găsite încep să devină ceva viu; mă simt acasă în mijlocul dezordonat al facerii.",
     heartProject:
-      "Art that belongs to a place — creating immersive public installations co-made with the communities they live in.",
-    socials: { website: "luciaferraro.art", instagram: "instagram.com/luciaferraro" },
+      "Vreau să aduc artă în spațiile publice, făcută împreună cu oamenii din locul unde trăiește.",
+    socials: { website: "liviufarcas.art", instagram: "instagram.com/liviufarcas" },
   },
   {
     loginEmail: "mihai.stan@example.com",
     name: "Mihai Stan",
-    location: "Iași, Romania",
+    location: "Iași, România",
     skills:
-      "Oil painter and muralist — portraiture, large-scale wall murals, and color palettes that carry a mood. Takes commissions from small canvases to building-sized walls and handles surface prep and durable outdoor finishes.",
+      "Sunt pictor în ulei și muralist — portret, picturi murale de mari dimensiuni și palete de culoare care poartă o stare. Iau comenzi de la pânze mici la pereți cât o clădire și mă ocup de pregătirea suprafeței și de finisaje rezistente la exterior.",
     passions:
-      "Falls into deep flow mixing a color until it carries the exact mood; loves the moment a face on the canvas starts to look back.",
+      "Intru în flow amestecând o culoare până când poartă exact starea pe care o caut; iubesc clipa în care un chip de pe pânză începe să-ți răspundă.",
     heartProject:
-      "City as canvas — aiming to give whole neighborhoods their mood back, one facade at a time.",
+      "Vreau să redau cartierelor culoarea și starea, o fațadă pe rând.",
     socials: { website: "behance.net/mihaistan", instagram: "instagram.com/mihaipaints" },
   },
   {
     loginEmail: "carmen.velasco@example.com",
-    name: "Carmen Velasco",
-    location: "Barcelona, Spain",
+    name: "Cosmin Velea",
+    location: "București, România",
     skills:
-      "Builds growth and brand from positioning down to channels — messaging, content strategy, performance campaigns, and lifecycle email. Strong on finding the story that makes a product click and turning it into a repeatable acquisition engine.",
+      "Construiesc brand și creștere de la poziționare până la canale — mesaj, strategie de conținut, campanii și email pe tot ciclul de viață. Caut povestea care face un produs să se lege și o transform într-un motor de creștere care se repetă.",
     passions:
-      "Energized by the click when a brand's true story finally lands; loves watching a sharp message turn into real momentum.",
+      "Mă energizează clipa în care povestea adevărată a unui brand se așază în sfârșit la locul ei; iubesc când un mesaj clar devine avânt real.",
     heartProject:
-      "Repeatable growth engine — helping founders find the story that makes a product click and turn it into acquisition that compounds.",
-    socials: { email: "carmen@velasco.marketing", linkedin: "linkedin.com/in/carmenvelasco", x: "x.com/carmenvel" },
+      "Vreau să-mi ating libertatea financiară făcând ce-mi place — ajutând oameni și afaceri să construiască și să crească produse digitale.",
+    socials: { email: "cosmin@velea.marketing", linkedin: "linkedin.com/in/cosminvelea", x: "x.com/cosminvelea" },
   },
   {
     loginEmail: "tudor.apostol@example.com",
     name: "Tudor Apostol",
-    location: "Cluj-Napoca, Romania",
+    location: "Cluj-Napoca, România",
     skills:
-      "Keeps complex projects on track — scoping, planning, cross-team coordination, and operational process design. Brings calm structure to chaos: clear milestones, owners, and the unglamorous follow-through that ships things.",
+      "Țin proiecte complexe pe drumul lor — definire, planificare, coordonare între echipe și proiectare de procese. Aduc structură calmă în haos: jaloane clare, oameni responsabili și urmărirea aceea neglamuroasă care duce lucrurile la capăt.",
     passions:
-      "Quietly thrilled when chaos resolves into a clear plan everyone can follow; finds calm in turning a mess into momentum.",
+      "Mă bucur în liniște când haosul se așază într-un plan clar pe care toți îl pot urma; găsesc calm în a transforma o harababură în avânt.",
     heartProject:
-      "Calm in complex delivery — bringing structure to chaotic projects so ambitious things actually ship.",
+      "Vreau să aduc ordine în proiecte haotice, ca lucrurile ambițioase să ajungă cu adevărat la final.",
     socials: { linkedin: "linkedin.com/in/tudorapostol" },
   },
   {
     loginEmail: "elena.radu@example.com",
-    name: "Elena Radu",
-    location: "Bucharest, Romania",
+    name: "Emil Radu",
+    location: "București, România",
     skills:
-      "Coaches founders and senior leaders — team culture, decision-making under pressure, hard conversations, and growing managers. Helps leaders see their blind spots and build teams that trust each other.",
+      "Lucrez cu fondatori și lideri seniori — cultură de echipă, decizii sub presiune, conversații grele și creșterea managerilor. Îi ajut pe lideri să-și vadă punctele oarbe și să construiască echipe care au încredere unele în altele.",
     passions:
-      "Most alive in the room when a leader sees their blind spot and something shifts; loves the charged silence before a breakthrough.",
+      "Sunt cel mai viu în încăpere când un lider își vede punctul orb și ceva se schimbă; iubesc liniștea încărcată dinaintea unei revelații.",
     heartProject:
-      "Leaders who build trust — coaching founders to grow teams that trust each other and make hard calls well.",
-    socials: { email: "hello@elenaradu.coach", website: "elenaradu.coach", linkedin: "linkedin.com/in/elenaradu" },
+      "Vreau să ajut liderii să crească echipe în care oamenii au încredere unii în alții.",
+    socials: { email: "hello@emilradu.coach", website: "emilradu.coach", linkedin: "linkedin.com/in/emilradu" },
   },
   {
     loginEmail: "radu.pop@example.com",
     name: "Radu Pop",
-    location: "Sibiu, Romania",
+    location: "Sibiu, România",
     skills:
-      "Designs and commissions electrical power systems — building electrical design, load calculations, switchgear, grid connection, and solar/battery installations. Handles the path from single-line diagram to inspected, energized system.",
+      "Proiectez și pun în funcțiune sisteme electrice — proiectare electrică pentru clădiri, calcule de sarcină, tablouri, racordare la rețea și instalații solare cu baterii. Duc lucrurile de la schema monofilară până la sistemul verificat și pus sub tensiune.",
     passions:
-      "Loves the moment a system he designed first energizes cleanly; finds flow tracing a circuit until every load balances.",
+      "Iubesc clipa în care un sistem gândit de mine pornește curat prima dată; intru în flow urmărind un circuit până când fiecare sarcină se echilibrează.",
     heartProject:
-      "Power off the grid — designing solar+storage systems that bring reliable electricity to places the grid doesn't reach.",
+      "Vreau să aduc electricitate sigură, din soare și baterii, în locurile unde rețeaua nu ajunge.",
     socials: { phone: "+40 723 456 789", linkedin: "linkedin.com/in/radupop" },
   },
   {
     loginEmail: "sanda.niculae@example.com",
-    name: "Sanda Niculae",
-    location: "Timișoara, Romania",
+    name: "Sandu Niculae",
+    location: "Timișoara, România",
     skills:
-      "Designs embedded hardware and firmware — PCB layout, microcontrollers, sensor integration, low-power IoT, and bring-up/debug of new boards. Takes a product from schematic through prototype to manufacturable hardware.",
+      "Proiectez hardware embedded și firmware — cablaj PCB, microcontrolere, integrare de senzori, IoT de consum mic și aducerea la viață a plăcilor noi. Duc un produs de la schemă, prin prototip, până la hardware care se poate fabrica.",
     passions:
-      "Lights up when a freshly soldered board boots for the first time; loses hours chasing a bug down to a single misbehaving register.",
+      "Mă luminez când o placă proaspăt lipită pornește prima oară; pierd ore vânând un bug până la un singur registru care se poartă urât.",
     heartProject:
-      "Hardware that ships — set on taking embedded products from schematic all the way to manufacturable hardware.",
-    socials: { website: "github.com/sandan", linkedin: "linkedin.com/in/sandaniculae" },
+      "Vreau să duc produse electronice de la schiță până la hardware care chiar se poate fabrica.",
+    socials: { website: "github.com/sandun", linkedin: "linkedin.com/in/sanduniculae" },
   },
   {
     loginEmail: "sofia.lindgren@example.com",
-    name: "Sofia Lindgren",
-    location: "Stockholm, Sweden",
+    name: "Sorin Lungu",
+    location: "Brașov, România",
     skills:
-      "Composes and produces music for film, games, and the concert hall — orchestral scoring, electronic textures, and theme writing. Reads a scene and writes the music it needs; comfortable conducting and producing a final mix.",
+      "Compun și produc muzică pentru film, jocuri și sala de concert — orchestrație, texturi electronice și teme muzicale. Citesc o scenă și scriu muzica de care are nevoie; pot să dirijez și să închei mixajul final.",
     passions:
-      "Disappears into a score for hours, hunting the one motif a scene is asking for; most present when sound and story lock together.",
+      "Mă pierd ore în partitură, căutând motivul pe care îl cere o scenă; sunt cel mai prezent când sunetul și povestea se prind unul de altul.",
     heartProject:
-      "The music a scene needs — composing scores that listen to the story and write exactly what it asks for.",
-    socials: { website: "sofialindgren.music", instagram: "instagram.com/sofialindgren" },
+      "Vreau să scriu muzica de care are nevoie o poveste, exact ce cere fiecare scenă.",
+    socials: { website: "sorinlungu.music", instagram: "instagram.com/sorinlungu" },
   },
   {
     loginEmail: "dragos.ilie@example.com",
     name: "Dragoș Ilie",
-    location: "Cluj-Napoca, Romania",
+    location: "Cluj-Napoca, România",
     skills:
-      "Mentors early founders — validating ideas, fundraising strategy, pitch and narrative, and avoiding common first-time mistakes. Has built and sold companies and gives direct, experience-backed advice.",
+      "Îndrum fondatori la început de drum — validarea ideii, strategie de finanțare, pitch și narațiune, și ocolirea greșelilor clasice. Am construit și vândut companii și dau sfaturi directe, din experiență.",
     passions:
-      "Energized by the spark in a founder who just found their wedge; loves the high-stakes clarity of an early, formative bet.",
+      "Mă energizează scânteia din ochii unui fondator care tocmai și-a găsit unghiul; iubesc claritatea cu miză mare a unui pariu timpuriu și formator.",
     heartProject:
-      "Founders who skip the obvious mistakes — mentoring early teams through validation, fundraising, and narrative with direct, experience-backed advice.",
+      "Vreau să ajut fondatorii la început de drum să ocolească greșelile evidente.",
     socials: { linkedin: "linkedin.com/in/dragosilie", x: "x.com/dragosilie" },
   },
   {
     loginEmail: "petra.novak@example.com",
-    name: "Petra Novak",
-    location: "Ljubljana, Slovenia",
+    name: "Petru Novac",
+    location: "Cluj-Napoca, România",
     skills:
-      "Designs product experiences end-to-end — user research, flows, wireframes, high-fidelity UI, and design systems. Bridges what users need and what's buildable, and runs usability testing to prove it.",
+      "Proiectez experiențe de produs cap-coadă — cercetare cu utilizatori, fluxuri, wireframe, UI de mare fidelitate și design systems. Fac puntea între ce au nevoie oamenii și ce se poate construi, și testez ca să fiu sigur.",
     passions:
-      "Hits flow when a tangled flow finally becomes obvious; loves watching a real user breeze through something she designed.",
+      "Intru în flow când un flux încâlcit devine în sfârșit evident; iubesc să văd un om real trecând lin prin ceva ce am proiectat.",
     heartProject:
-      "Products people understand instantly — designing end-to-end experiences and proving they work with real users.",
-    socials: { website: "petranovak.design", linkedin: "linkedin.com/in/petranovak" },
+      "Vreau să fac produse pe care oamenii le înțeleg din prima.",
+    socials: { website: "petrunovac.design", linkedin: "linkedin.com/in/petrunovac" },
   },
   {
     loginEmail: "alex.morgan@example.com",
-    name: "Alex Morgan",
-    location: "Cluj-Napoca, Romania",
+    name: "Alex Moraru",
+    location: "Cluj-Napoca, România",
     skills:
-      "Documentary and portrait photographer — events, brand shoots, and long-form photo stories. Strong on natural light, putting people at ease, and editing a shoot into a coherent narrative.",
+      "Sunt fotograf de documentar și portret — evenimente, ședințe de brand și povești foto de lungă durată. Lucrez mult cu lumina naturală, pun oamenii în largul lor și editez o ședință într-o poveste coerentă.",
     passions:
-      "Most present chasing the one frame where light, moment, and person align; loves the quiet of editing a shoot into a story.",
+      "Sunt cel mai prezent vânând cadrul în care lumina, momentul și omul se aliniază; iubesc liniștea editării unei ședințe într-o poveste.",
     heartProject:
-      "Stories told in pictures — building long-form photo essays on people and the crafts they keep alive.",
-    socials: { website: "alexmorgan.photo", instagram: "instagram.com/alexmorganphoto" },
+      "Vreau să spun în fotografii poveștile oamenilor și ale meseriilor pe care le țin vii.",
+    socials: { website: "alexmoraru.photo", instagram: "instagram.com/alexmoraruphoto" },
   },
   {
     loginEmail: "vlad.georgescu@example.com",
     name: "Vlad Georgescu",
-    location: "Brașov, Romania",
+    location: "Brașov, România",
     skills:
-      "Builds custom furniture and interior woodwork — joinery, hardwood furniture, built-ins, and restoration of old pieces. Works from a sketch to a finished, hand-joined object that lasts generations.",
+      "Fac mobilă la comandă și tâmplărie de interior — îmbinări, mobilă din lemn masiv, piese încastrate și restaurarea pieselor vechi. Pornesc de la o schiță și ajung la un obiect îmbinat manual, care ține generații.",
     passions:
-      "Loses himself in the rhythm of cutting a tight joint by hand; loves the smell of fresh-cut wood and a piece that will outlast him.",
+      "Mă pierd în ritmul tăierii unei îmbinări strânse cu mâna; iubesc mirosul de lemn proaspăt tăiat și o piesă care mă va supraviețui.",
     heartProject:
-      "Furniture that outlives us — building hand-joined pieces meant to last generations.",
+      "Vreau să fac mobilă lucrată manual, care să țină generații întregi.",
     socials: { phone: "+40 745 678 901", website: "georgescuwood.ro", instagram: "instagram.com/vladwoodwork" },
   },
   {
     loginEmail: "maria.costa@example.com",
-    name: "Maria Costa",
-    location: "Porto, Portugal",
+    name: "Marian Costea",
+    location: "Iași, România",
     skills:
-      "Turns data into decisions — predictive modeling, experimentation/AB testing, recommender systems, and clear communication of results to non-technical stakeholders. Equally happy in a notebook and in a strategy meeting.",
+      "Transform datele în decizii — modele predictive, experimente și testare A/B, sisteme de recomandare și explicarea limpede a rezultatelor pentru oameni non-tehnici. Mă simt la fel de bine într-un notebook și într-o ședință de strategie.",
     passions:
-      "Lights up when a model reveals a pattern no one saw; loves the moment data turns a hunch into a clear decision.",
+      "Mă luminez când un model scoate la iveală un tipar pe care nu-l văzuse nimeni; iubesc clipa în care datele transformă o bănuială într-o decizie clară.",
     heartProject:
-      "Decisions, not dashboards — turning data into models that actually change what teams do.",
-    socials: { website: "github.com/mariacosta", linkedin: "linkedin.com/in/mariacosta" },
+      "Vreau să transform datele în decizii care chiar schimbă ce fac echipele.",
+    socials: { website: "github.com/mariancostea", linkedin: "linkedin.com/in/mariancostea" },
   },
   {
     loginEmail: "irina.bancila@example.com",
-    name: "Irina Băncilă",
-    location: "Iași, Romania",
+    name: "Ionuț Băncilă",
+    location: "Iași, România",
     skills:
-      "Hand-builds and throws functional and sculptural ceramics — glaze chemistry, wheel throwing, and kiln firing. Teaches workshops and takes commissions for tableware and gallery pieces.",
+      "Modelez și ridic la roată ceramică funcțională și sculpturală — chimia glazurilor, lucrul la roată și arderea în cuptor. Țin ateliere și iau comenzi pentru veselă și piese de galerie.",
     passions:
-      "Most present at the wheel, centering clay until the room goes quiet; loves the gamble of opening the kiln after a firing.",
+      "Sunt cel mai prezent la roată, centrând lutul până se face liniște în cameră; iubesc pariul deschiderii cuptorului după o ardere.",
     heartProject:
-      "Beauty made to be used — making ceramics meant for daily life, not just the shelf.",
-    socials: { website: "etsy.com/shop/irinaceramics", instagram: "instagram.com/irinaceramics" },
+      "Vreau să fac ceramică pentru viața de zi cu zi, nu doar pentru raft.",
+    socials: { website: "etsy.com/shop/ionutceramics", instagram: "instagram.com/ionutceramics" },
   },
   {
     loginEmail: "andrei.lupu@example.com",
     name: "Andrei Lupu",
-    location: "Bucharest, Romania",
+    location: "București, România",
     skills:
-      "Records, mixes, and masters audio — studio tracking, live sound, post-production for film, and acoustic treatment of rooms. Knows both the gear and the ear; gets a clean, balanced result under real-world constraints.",
+      "Înregistrez, mixez și fac mastering — tracking în studio, sunet live, post-producție pentru film și tratarea acustică a camerelor. Cunosc și aparatura, și urechea, și scot un rezultat curat și echilibrat în condiții reale.",
     passions:
-      "Disappears into a mix chasing the moment a track suddenly breathes; loves dialing in a room until it finally sounds true.",
+      "Mă pierd într-un mix căutând clipa în care o piesă începe brusc să respire; iubesc să reglez o cameră până sună în sfârșit adevărat.",
     heartProject:
-      "A clean result under real constraints — recording and mixing so music sounds right outside the perfect room.",
+      "Vreau ca muzica să sune bine și în afara camerei perfecte.",
     socials: { website: "soundcloud.com/andreilupu", linkedin: "linkedin.com/in/andreilupu" },
   },
   {
     loginEmail: "diana.marinescu@example.com",
-    name: "Diana Marinescu",
-    location: "Cluj-Napoca, Romania",
+    name: "Darius Marinescu",
+    location: "Cluj-Napoca, România",
     skills:
-      "Brings people together and makes groups work — event design, workshop facilitation, group decision-making, and building volunteer communities. Creates spaces where people feel safe to contribute and decisions actually get made.",
+      "Adun oameni și fac grupurile să funcționeze — design de evenimente, facilitare de ateliere, decizii de grup și construirea de comunități de voluntari. Creez spații în care oamenii se simt în siguranță să contribuie și unde deciziile chiar se iau.",
     passions:
-      "Most alive when a room of strangers becomes a group that decides together; loves designing the moment people feel safe to speak.",
+      "Sunt cel mai viu când o cameră de străini devine un grup care decide împreună; iubesc să creez momentul în care oamenii se simt în siguranță să vorbească.",
     heartProject:
-      "Spaces where decisions actually happen — designing gatherings where people feel safe to contribute and groups truly decide together.",
-    socials: { linkedin: "linkedin.com/in/dianamarinescu", facebook: "facebook.com/dianafacilitates", instagram: "instagram.com/dianafacilitates" },
+      "Vreau să ajut cât mai mulți bărbați să se simtă conectați cu ei înșiși și să simtă că aparțin unui mediu, prin cercurile de bărbați pe care le organizez.",
+    socials: { linkedin: "linkedin.com/in/dariusmarinescu", facebook: "facebook.com/dariusfaciliteaza", instagram: "instagram.com/dariusfaciliteaza" },
   },
 ];
 

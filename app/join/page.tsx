@@ -23,20 +23,21 @@ export default function JoinPage() {
         >
           <path d="M12 5l-5 5 5 5" />
         </svg>
-        Back
+        Înapoi
       </Link>
       <div>
-        <h1 className="text-2xl font-semibold">Join the network</h1>
+        <h1 className="text-2xl font-semibold">Intră în rețea</h1>
         <p className="mt-2 text-sm text-zinc-600">
-          This network is for men who've taken part in at least one Man
-          Circle at Camping Fain.
+          Această rețea este pentru bărbații care au participat la cel puțin un
+          Cerc de Bărbați la Camping Fain.
         </p>
         <p className="mt-2 text-sm text-zinc-600">
-          To join, ask a community admin to send you an invite link.
+          Ca să intri, cere unui administrator al comunității să-ți trimită un
+          link de invitație.
         </p>
       </div>
       <p className="text-sm text-zinc-600">
-        Already have an invite link? Just click it to join.
+        Ai deja un link de invitație? Dă click pe el ca să intri.
       </p>
     </main>
   );

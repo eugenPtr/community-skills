@@ -31,7 +31,7 @@ export default async function MembersPage() {
     <>
       <AuthedMenu isAdmin={member.role === "admin"} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
-        <h1 className="text-2xl font-semibold">Members</h1>
+        <h1 className="text-2xl font-semibold">Membri</h1>
         <ul className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4">
           {members.map((m) => (
             <Card key={m.id} member={m} isOwn={m.id === user.id} />
@@ -47,7 +47,7 @@ function Card({ member, isOwn }: { member: MemberCard; isOwn: boolean }) {
   // read-only /profile/{id}.
   const href = isOwn ? "/profile" : `/profile/${member.id}`;
   const heartProject = member.heartProjectSeeking
-    ? "Seeking one"
+    ? "În căutare"
     : member.heartProjectDescription;
 
   return (
@@ -58,13 +58,13 @@ function Card({ member, isOwn }: { member: MemberCard; isOwn: boolean }) {
       >
         <h2 className="font-semibold text-white">{member.name}</h2>
         <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
-          Heart Project
+          Proiect de Suflet
         </p>
         <p className="mt-0.5 line-clamp-3 text-sm text-white">
           {heartProject}
         </p>
         <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-zinc-300">
-          Skills
+          Abilități
         </p>
         <p className="mt-0.5 line-clamp-3 text-sm text-white">
           {member.skills}

@@ -8,10 +8,10 @@ import { toast } from "sonner";
 // (?error= / ?sent=). This client component surfaces them as a toast, then
 // strips the param so a refresh doesn't replay it. See AGENTS.md "UI feedback".
 const ERROR_MESSAGES: Record<string, string> = {
-  "missing-email": "Enter your email address.",
-  "missing-fields": "Please fill in all required fields.",
+  "missing-email": "Introdu adresa ta de email.",
+  "missing-fields": "Te rugăm să completezi toate câmpurile obligatorii.",
   "already-claimed":
-    "This invite has already been claimed — contact the person who invited you.",
+    "Această invitație a fost deja folosită — contactează persoana care te-a invitat.",
 };
 
 // sent=*: neutral confirmation that never reveals whether the email is a
@@ -19,7 +19,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 // panel (checkInbox=1) rendered by the sign-in page, not a toast.
 const SENT_MESSAGES: Record<string, string> = {};
 const SENT_MESSAGE_NEUTRAL =
-  "If an account exists for this email, a link was sent.";
+  "Dacă există un cont pentru acest email, a fost trimis un link.";
 
 export function SearchParamsToast() {
   const searchParams = useSearchParams();
