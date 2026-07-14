@@ -30,13 +30,13 @@ export function AuthedMenu({ isAdmin = false }: { isAdmin?: boolean }) {
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between bg-background px-4 py-3">
       <Link href="/" className="text-sm font-semibold text-white">
-        Community skills chest
+        Cufărul cu abilități
       </Link>
 
       <div ref={ref} className="relative">
         <button
           type="button"
-          aria-label="Menu"
+          aria-label="Meniu"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
           className="flex h-9 w-9 items-center justify-center rounded-md text-white hover:bg-white/10"
@@ -73,14 +73,14 @@ export function AuthedMenu({ isAdmin = false }: { isAdmin?: boolean }) {
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-zinc-100 hover:bg-zinc-700"
             >
-              Profile
+              Profil
             </Link>
             <Link
               href="/members"
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-zinc-100 hover:bg-zinc-700"
             >
-              Members
+              Membri
             </Link>
             <form action={signOutAction}>
               <button

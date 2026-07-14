@@ -10,9 +10,9 @@ export default function OnboardingForm({ invite }: { invite: string }) {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
       <div>
-        <h1 className="text-2xl font-semibold">Join the network</h1>
+        <h1 className="text-2xl font-semibold">Intră în rețea</h1>
         <p className="mt-2 text-sm text-zinc-600">
-          Tell us about yourself so Members can find you.
+          Spune-ne despre tine, ca membrii să te poată găsi.
         </p>
       </div>
 
@@ -25,32 +25,32 @@ export default function OnboardingForm({ invite }: { invite: string }) {
 
         <div className="flex gap-4">
           <div className="flex flex-1 flex-col gap-1">
-            <label htmlFor="first_name" className="text-sm font-medium">First name</label>
+            <label htmlFor="first_name" className="text-sm font-medium">Prenume</label>
             <input id="first_name" name="first_name" required disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
           </div>
           <div className="flex flex-1 flex-col gap-1">
-            <label htmlFor="last_name" className="text-sm font-medium">Last name</label>
+            <label htmlFor="last_name" className="text-sm font-medium">Nume</label>
             <input id="last_name" name="last_name" required disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
           </div>
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="location" className="text-sm font-medium">Location</label>
-          <input id="location" name="location" required disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" placeholder="City, Country" />
+          <label htmlFor="location" className="text-sm font-medium">Localitate</label>
+          <input id="location" name="location" required disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" placeholder="Oraș, Țară" />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="skills" className="text-sm font-medium">Skills</label>
-          <textarea id="skills" name="skills" required rows={3} disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" placeholder="What can you do for others?" />
+          <label htmlFor="skills" className="text-sm font-medium">Abilități</label>
+          <textarea id="skills" name="skills" required rows={3} disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" placeholder="Cu ce îi poți ajuta pe ceilalți?" />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="passions" className="text-sm font-medium">Passions</label>
-          <textarea id="passions" name="passions" required rows={3} disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" placeholder="What puts you in a state of flow?" />
+          <label htmlFor="passions" className="text-sm font-medium">Pasiuni</label>
+          <textarea id="passions" name="passions" required rows={3} disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" placeholder="Ce te aduce în starea de flow?" />
         </div>
 
         <div className="flex flex-col gap-3">
-          <p className="text-sm font-medium">Do you have a Heart Project?</p>
+          <p className="text-sm font-medium">Ai un Proiect de Suflet?</p>
           <div className="flex gap-3">
             <button
               type="button"
@@ -58,7 +58,7 @@ export default function OnboardingForm({ invite }: { invite: string }) {
               onClick={() => setHasHeartProject(true)}
               className={`flex-1 rounded border px-3 py-2 text-sm disabled:opacity-50 ${hasHeartProject === true ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300"}`}
             >
-              Yes
+              Da
             </button>
             <button
               type="button"
@@ -66,7 +66,7 @@ export default function OnboardingForm({ invite }: { invite: string }) {
               onClick={() => setHasHeartProject(false)}
               className={`flex-1 rounded border px-3 py-2 text-sm disabled:opacity-50 ${hasHeartProject === false ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300"}`}
             >
-              Not yet
+              Încă nu
             </button>
           </div>
 
@@ -79,7 +79,7 @@ export default function OnboardingForm({ invite }: { invite: string }) {
           {hasHeartProject === true && (
             <div className="flex flex-col gap-1">
               <label htmlFor="heart_project_description" className="text-sm font-medium">
-                Describe your Heart Project
+                Descrie-ți Proiectul de Suflet
               </label>
               <textarea
                 id="heart_project_description"
@@ -87,30 +87,30 @@ export default function OnboardingForm({ invite }: { invite: string }) {
                 rows={4}
                 disabled={submitting}
                 className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50"
-                placeholder="What are you most devoted to building or creating?"
+                placeholder="Ce îți dorești cel mai mult să construiești sau să creezi?"
               />
             </div>
           )}
         </div>
 
         <div className="flex flex-col gap-3">
-          <p className="text-sm font-medium">Social Links</p>
+          <p className="text-sm font-medium">Rețele și contact</p>
           <p className="-mt-2 text-xs text-zinc-500">
-            All optional. Shown on your Profile so Members can reach you.
+            Toate opționale. Apar pe profilul tău, ca membrii să te poată contacta.
           </p>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="phone" className="text-sm font-medium">Phone</label>
+            <label htmlFor="phone" className="text-sm font-medium">Telefon</label>
             <input id="phone" name="phone" type="tel" disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="contact_email" className="text-sm font-medium">Contact email</label>
+            <label htmlFor="contact_email" className="text-sm font-medium">Email de contact</label>
             <input id="contact_email" name="contact_email" type="email" disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="website" className="text-sm font-medium">Website</label>
+            <label htmlFor="website" className="text-sm font-medium">Site web</label>
             <input id="website" name="website" disabled={submitting} className="rounded border border-zinc-300 px-3 py-2 disabled:opacity-50" />
           </div>
 
@@ -140,7 +140,7 @@ export default function OnboardingForm({ invite }: { invite: string }) {
           disabled={submitting}
           className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
-          {submitting ? "Joining…" : "Join the network"}
+          {submitting ? "Se trimite…" : "Intră în rețea"}
         </button>
       </form>
     </main>

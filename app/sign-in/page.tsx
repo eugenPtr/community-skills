@@ -36,9 +36,9 @@ export default async function SignInPage({
     if (result.kind === "invalid") {
       return (
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
-          <h1 className="text-2xl font-semibold">Invitation code invalid</h1>
+          <h1 className="text-2xl font-semibold">Cod de invitație invalid</h1>
           <p className="text-sm text-zinc-600">
-            This invite code doesn't exist. Check the link you were sent.
+            Acest cod de invitație nu există. Verifică linkul pe care l-ai primit.
           </p>
         </main>
       );
@@ -47,9 +47,9 @@ export default async function SignInPage({
     if (result.kind === "already-claimed") {
       return (
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
-          <h1 className="text-2xl font-semibold">Invite already used</h1>
+          <h1 className="text-2xl font-semibold">Invitație deja folosită</h1>
           <p className="text-sm text-zinc-600">
-            This invite has already been claimed. Contact the person who invited you.
+            Această invitație a fost deja folosită. Contactează persoana care te-a invitat.
           </p>
         </main>
       );
@@ -64,9 +64,9 @@ export default async function SignInPage({
   if (checkInbox) {
     return (
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
-        <h1 className="text-2xl font-semibold">Check your inbox</h1>
+        <h1 className="text-2xl font-semibold">Verifică-ți emailul</h1>
         <p className="text-sm text-zinc-600">
-          Check your inbox for the magic sign in link.
+          Caută în inbox linkul magic de autentificare.
         </p>
       </main>
     );
@@ -75,11 +75,11 @@ export default async function SignInPage({
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
       <div>
-        <h1 className="text-2xl font-semibold">{invite ? "You're invited" : "Sign in"}</h1>
+        <h1 className="text-2xl font-semibold">{invite ? "Ești invitat" : "Autentificare"}</h1>
         <p className="mt-2 text-sm text-zinc-600">
           {invite
-            ? "Your invite's confirmed. Enter your email and we'll send a magic sign-in link."
-            : "Enter your email — we'll send you a magic link. You'll need an invite code on the next screen."}
+            ? "Invitația ta e confirmată. Introdu-ți emailul și îți trimitem un link magic de autentificare."
+            : "Introdu-ți emailul — îți trimitem un link magic. Vei avea nevoie de un cod de invitație pe ecranul următor."}
         </p>
       </div>
 
@@ -96,7 +96,7 @@ export default async function SignInPage({
           className="rounded border border-zinc-300 px-3 py-2"
           placeholder="you@example.com"
         />
-        <SubmitButton label={invite ? "Send confirmation email" : undefined} />
+        <SubmitButton label={invite ? "Trimite emailul de confirmare" : undefined} />
       </form>
     </main>
   );
