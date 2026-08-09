@@ -37,19 +37,29 @@ Reached via `/admin/dashboard`.
 _Avoid_: Admin panel, console, backoffice
 
 **Profile**:
-The information a Member publishes about themselves: name, location, social links, heart project,
-and skills.
+The information a Member publishes about themselves: name, location, Contact Details, Heart Project,
+Passions, and Skills.
 _Avoid_: Bio, page, account
 
-**Social Links**:
-The optional ways a Member can be reached or found, published on their Profile: phone, contact
-email, website, LinkedIn, Facebook, Instagram, X. All optional.
-_Avoid_: Contacts, handles
+**Contact Details**:
+The ways a Member can be reached or found, published on their Profile. Comprises mandatory Direct
+Contact Details and optional Online Links.
+_Avoid_: Social Links, handles
+
+**Direct Contact Details**:
+The Member's public Phone and Contact Email. Both are required because Members join the network
+ready to be contacted for services and support.
+_Avoid_: Contacts, Social Links
+
+**Online Links**:
+Optional public links through which a Member can be found: website, LinkedIn, Facebook, Instagram,
+and X.
+_Avoid_: Social Links, handles
 
 **Contact Email**:
-An optional public email a Member chooses to publish as a Social Link so others can reach them.
-Distinct from the login email — it is display-only, never used for authentication or the
-Member gate, and may differ from (or be absent despite) the login email.
+A required public email a Member publishes as a Direct Contact Detail so others can reach them.
+Distinct from the login email — it is display-only, never used for authentication or the Member
+gate, and may differ from it.
 _Avoid_: Email (unqualified), login email
 
 **Skill**:
