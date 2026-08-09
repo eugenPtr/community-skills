@@ -27,10 +27,10 @@ export default function JoinPage() {
       </Link>
       <div>
         <h1 className="text-2xl font-semibold">Intră în rețea</h1>
-        <p className="mt-2 text-sm text-zinc-600">
+        <p className="mt-2 text-sm text-zinc-300">
           Ca să intri, cere un link de invitație unui administrator al comunității.
         </p>
-         <p className="mt-2 text-sm text-zinc-600">
+         <p className="mt-2 text-sm text-zinc-300">
           Ai deja un link de invitație? Dă click pe el ca să intri.
         </p>
       </div>

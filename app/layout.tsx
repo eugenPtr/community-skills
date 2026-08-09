@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Colectia de resurse",
+  title: "Reteaua de suport",
   description: "O aplicatie care usureaza cautarea de resurse in cadrul comunitatii de barbati din Romania",
 };
 

@@ -37,7 +37,7 @@ export default async function SignInPage({
       return (
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
           <h1 className="text-2xl font-semibold">Cod de invitație invalid</h1>
-          <p className="text-sm text-zinc-600">
+          <p className="text-sm text-zinc-300">
             Acest cod de invitație nu există. Verifică linkul pe care l-ai primit.
           </p>
         </main>
@@ -48,7 +48,7 @@ export default async function SignInPage({
       return (
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
           <h1 className="text-2xl font-semibold">Invitație deja folosită</h1>
-          <p className="text-sm text-zinc-600">
+          <p className="text-sm text-zinc-300">
             Această invitație a fost deja folosită. Contactează persoana care te-a invitat.
           </p>
         </main>
@@ -65,7 +65,7 @@ export default async function SignInPage({
     return (
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
         <h1 className="text-2xl font-semibold">Verifică-ți emailul</h1>
-        <p className="text-sm text-zinc-600">
+        <p className="text-sm text-zinc-300">
           Caută în inbox linkul magic de autentificare.
         </p>
       </main>
@@ -76,7 +76,7 @@ export default async function SignInPage({
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
       <div>
         <h1 className="text-2xl font-semibold">{invite ? "Ești invitat" : "Autentificare"}</h1>
-        <p className="mt-2 text-sm text-zinc-600">
+        <p className="mt-2 text-sm text-zinc-300">
           {invite
             ? "Invitația ta e confirmată. Introdu-ți emailul și îți trimitem un link magic de autentificare."
             : "Introdu-ți emailul — îți trimitem un link magic. Vei avea nevoie de un cod de invitație pe ecranul următor."}
@@ -93,10 +93,10 @@ export default async function SignInPage({
           name="email"
           type="email"
           required
-          className="rounded border border-zinc-300 px-3 py-2"
+          className="rounded border border-zinc-600 px-3 py-2"
           placeholder="you@example.com"
         />
-        <SubmitButton label={invite ? "Trimite emailul de confirmare" : undefined} />
+        <SubmitButton label={invite ? "Trimite link-ul de autentificare" : undefined} />
       </form>
     </main>
   );
