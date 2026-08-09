@@ -1,6 +1,6 @@
 # Barbati la Fain Network
 
-A private, invite-only network (≤1000 people) where members publish their skills and
+A private, invite-only network (≤1000 people) where members publish their Resources and
 projects so others can find the right person to help them. Discovery happens through an
 in-app AI chat that searches over members.
 
@@ -38,7 +38,7 @@ _Avoid_: Admin panel, console, backoffice
 
 **Profile**:
 The information a Member publishes about themselves: name, location, Contact Details, Heart Project,
-Passions, and Skills.
+Passions, and Resources.
 _Avoid_: Bio, page, account
 
 **Contact Details**:
@@ -62,10 +62,22 @@ Distinct from the login email — it is display-only, never used for authenticat
 gate, and may differ from it.
 _Avoid_: Email (unqualified), login email
 
-**Skill**:
-A capability a Member offers to the network (e.g. "construction with natural materials").
-The primary thing the AI search matches on.
-_Avoid_: Tag, expertise, service
+**Resource**:
+A specific material thing or service a Member offers to the Community (e.g. "one-hour software
+development consultation" or "SaaS development services") and the primary thing People Search
+matches on, replacing Skill. Every Resource is offered either for free or for payment; a Member
+must publish at least one, but may publish Resources in only one of those categories.
+_Avoid_: Skill, tag, expertise
+
+**Free Resource**:
+A Resource for which the offering Member charges no fee. Any other terms are agreed directly
+between Members and are not represented by the network.
+_Avoid_: Complimentary Skill, zero-priced service
+
+**Paid Resource**:
+A Resource for which the offering Member expects payment. The network classifies the Resource as
+paid but does not represent its price or commercial terms; Members agree those directly.
+_Avoid_: Product, listing, priced Resource
 
 **Passions**:
 What a Member feels most alive doing — the activities, work, and experiences that bring them
@@ -76,7 +88,7 @@ _Avoid_: Interests, hobbies, bio
 **Heart Project**:
 The single pursuit a Member is most devoted to — the work or becoming they do with love.
 A Member either has one (described in their own words) or is still seeking one.
-Published on the profile and searchable alongside skills.
+Published on the profile and searchable alongside Resources.
 _Avoid_: Project, initiative, work item
 
 **Community**:
