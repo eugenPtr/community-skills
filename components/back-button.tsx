@@ -9,13 +9,16 @@ import { useRouter } from "next/navigation";
 export function BackButton({
   fallbackHref,
   label = "Înapoi",
+  onBeforeNavigate,
 }: {
   fallbackHref: string;
   label?: string;
+  onBeforeNavigate?: () => boolean;
 }) {
   const router = useRouter();
 
   function goBack() {
+    if (onBeforeNavigate && !onBeforeNavigate()) return;
     // window.history.length > 1 means we navigated here within the app.
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.back();

@@ -7,7 +7,7 @@ const BASE_PROFILE = {
   firstName: "Alice",
   lastName: "Example",
   location: "Bucharest",
-  skills: "backend, systems thinking",
+  resources: [{ description: "backend systems thinking", classification: "free" as const }],
   passions: "open-source software",
   heartProjectSeeking: false,
   heartProjectDescription: "Building a cooperative network",
@@ -34,7 +34,7 @@ describe("submitOnboarding (S1 integration seam)", () => {
       email: "alice@example.com",
     });
 
-    const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+    const result = await submitOnboarding({ db: pgliteOnboardingAdapter(db), embedder: async () => [1, 0, 0] }, {
       userId: seeded.userId,
       email: seeded.email,
       code: seeded.code,
@@ -75,7 +75,7 @@ describe("submitOnboarding (S1 integration seam)", () => {
       email: "erin@example.com",
     });
 
-    const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+    const result = await submitOnboarding({ db: pgliteOnboardingAdapter(db), embedder: async () => [1, 0, 0] }, {
       userId: seeded.userId,
       email: seeded.email,
       code: seeded.code,
@@ -116,7 +116,7 @@ describe("submitOnboarding (S1 integration seam)", () => {
       { phone: "", email: "frank@example.com" },
       { phone: "+40721234567", email: "   " },
     ]) {
-      const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+      const result = await submitOnboarding({ db: pgliteOnboardingAdapter(db), embedder: async () => [1, 0, 0] }, {
         userId: seeded.userId,
         email: seeded.email,
         code: seeded.code,
@@ -145,7 +145,7 @@ describe("submitOnboarding (S1 integration seam)", () => {
       email: "gina@example.com",
     });
 
-    const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+    const result = await submitOnboarding({ db: pgliteOnboardingAdapter(db), embedder: async () => [1, 0, 0] }, {
       userId: seeded.userId,
       email: seeded.email,
       code: seeded.code,
@@ -182,7 +182,7 @@ describe("submitOnboarding (S1 integration seam)", () => {
       email: "alice@example.com",
     });
 
-    const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+    const result = await submitOnboarding({ db: pgliteOnboardingAdapter(db), embedder: async () => [1, 0, 0] }, {
       userId: seeded.userId,
       email: seeded.email,
       code: seeded.code,
@@ -204,7 +204,7 @@ describe("submitOnboarding (S1 integration seam)", () => {
       code: "DEV-CCCC-0002",
       email: "bob@example.com",
     });
-    await submitOnboarding(pgliteOnboardingAdapter(db), {
+    await submitOnboarding({ db: pgliteOnboardingAdapter(db), embedder: async () => [1, 0, 0] }, {
       userId: first.userId,
       email: first.email,
       code: first.code,
@@ -217,7 +217,7 @@ describe("submitOnboarding (S1 integration seam)", () => {
       "carol@example.com",
     ]);
 
-    const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+    const result = await submitOnboarding({ db: pgliteOnboardingAdapter(db), embedder: async () => [1, 0, 0] }, {
       userId: secondUserId,
       email: "carol@example.com",
       code: first.code,
@@ -239,7 +239,7 @@ describe("submitOnboarding (S1 integration seam)", () => {
       email: "dave@example.com",
     });
 
-    const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+    const result = await submitOnboarding({ db: pgliteOnboardingAdapter(db), embedder: async () => [1, 0, 0] }, {
       userId: seeded.userId,
       email: seeded.email,
       code: seeded.code,
@@ -259,6 +259,31 @@ describe("submitOnboarding (S1 integration seam)", () => {
       `select claimed_by from invites where code = $1`,
       [seeded.code],
     );
+    expect(invite.rows[0].claimed_by).toBeNull();
+  });
+
+  it("rejects missing, duplicate, oversized and over-limit Resources before claiming", async () => {
+    for (const resources of [
+      [],
+      [{ description: "Mentorat", classification: "free" as const }, { description: "  MENTORAT  ", classification: "paid" as const }],
+      [{ description: "x".repeat(256), classification: "free" as const }],
+      Array.from({ length: 11 }, (_, index) => ({ description: `Resource ${index}`, classification: "free" as const })),
+    ]) {
+      const seeded = await seedUnclaimedInvite(db, { code: `DEV-R-${crypto.randomUUID()}`, email: `${crypto.randomUUID()}@example.com` });
+      const result = await submitOnboarding({ db: pgliteOnboardingAdapter(db), embedder: async () => [1,0,0] },
+        { userId: seeded.userId, email: seeded.email, code: seeded.code, ...BASE_PROFILE, resources });
+      expect(result).toEqual({ kind: "missingFields" });
+      const invite = await db.query<{ claimed_by: string | null }>("select claimed_by from invites where code=$1", [seeded.code]);
+      expect(invite.rows[0].claimed_by).toBeNull();
+    }
+  });
+
+  it("publishes nothing when synchronous Resource indexing fails", async () => {
+    const seeded = await seedUnclaimedInvite(db, { code: "DEV-INDEX-FAIL", email: "index@example.com" });
+    await expect(submitOnboarding({ db: pgliteOnboardingAdapter(db), embedder: async () => { throw new Error("gateway unavailable"); } },
+      { userId: seeded.userId, email: seeded.email, code: seeded.code, ...BASE_PROFILE })).rejects.toThrow("gateway unavailable");
+    expect((await db.query("select id from members where id=$1", [seeded.userId])).rows).toEqual([]);
+    const invite = await db.query<{ claimed_by: string | null }>("select claimed_by from invites where code=$1", [seeded.code]);
     expect(invite.rows[0].claimed_by).toBeNull();
   });
 });

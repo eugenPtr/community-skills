@@ -25,12 +25,11 @@
  * (@example.com); the public Contact Email lives in socials.email.
  *
  * Field mapping (persona text → profiles schema, which has no Projects table):
- *   skills                    ← persona Skills
+ *   resources               ← persona Skills
  *   passions                  ← persona Passions
  *   heart_project_description ← persona Project #1 (heart_project_seeking = false)
  */
 import { createClient } from "@supabase/supabase-js";
-import { embedMember, supabaseEmbedMemberClient } from "@/lib/people-search/embed-member";
 import { gatewayEmbedder } from "@/lib/people-search/ai-gateway";
 
 type Socials = {
@@ -47,7 +46,7 @@ type Persona = {
   loginEmail: string;
   name: string;
   location: string;
-  skills: string;
+  resources: string;
   passions: string;
   heartProject: string;
   socials: Socials;
@@ -55,10 +54,10 @@ type Persona = {
 
 const personas: Persona[] = [
   {
-    loginEmail: "ana.dumitrescu@example.com",
+    loginEmail: "andrei.dumitrescu@example.com",
     name: "Andrei Dumitrescu",
     location: "București, România",
-    skills:
+    resources:
       "Construiesc backend-uri solide și fluxuri de date — proiectez scheme Postgres, servicii event-driven, ETL și infrastructură de analiză. Mă pricep să scot date curate și ușor de interogat din surse haotice.",
     passions:
       "Pot să pierd ore întregi descurcând un model de date complicat, până se așază totul la locul lui; mă bucur sincer când o interogare care dura minute se întoarce instant.",
@@ -70,7 +69,7 @@ const personas: Persona[] = [
     loginEmail: "iosif.marin@example.com",
     name: 'Iosif "Joe" Marin',
     location: "Timișoara, România",
-    skills:
+    resources:
       "Construiesc case cu materiale moderne — structuri metalice, beton structural, panouri prefabricate și izolație eficientă energetic. Lucrez îngrijit, după cod, și prind drag de fiecare detaliu structural greu pe care reușesc să-l rezolv curat.",
     passions:
       "Prind viață pe șantier în zori, privind cum se ridică o structură exact după plan; mă încarcă un detaliu structural greu care se așază în sfârșit.",
@@ -82,7 +81,7 @@ const personas: Persona[] = [
     loginEmail: "bogdan.craciun@example.com",
     name: 'Bogdan "Bob" Crăciun',
     location: "Brașov, România",
-    skills:
+    resources:
       "Construiesc cu materiale naturale și tradiționale — lemn, cob, tencuială de var, baloți de paie, piatră recuperată. Mă dedic caselor sănătoase, care respiră, și restaurării clădirilor vechi așa cum au fost făcute.",
     passions:
       "Sunt cel mai prezent cu mâinile în var și lemn, modelând un perete care respiră; găsesc liniște în ritmul lent și tactil al construcției naturale.",
@@ -91,10 +90,10 @@ const personas: Persona[] = [
     socials: { website: "craciunnatural.ro", facebook: "facebook.com/craciunnatural", instagram: "instagram.com/bobnatural" },
   },
   {
-    loginEmail: "lucia.ferraro@example.com",
+    loginEmail: "liviu.farcas@example.com",
     name: "Liviu Fărcaș",
     location: "Cluj-Napoca, România",
-    skills:
+    resources:
       "Lucrez în instalație, colaj și artă publică — transform spații și materiale găsite în lucrări în care poți intra. Creez împreună cu comunitatea și duc o comandă de la concept până la montaj.",
     passions:
       "Mă luminez când un spațiu gol și o grămadă de materiale găsite încep să devină ceva viu; mă simt acasă în mijlocul dezordonat al facerii.",
@@ -106,7 +105,7 @@ const personas: Persona[] = [
     loginEmail: "mihai.stan@example.com",
     name: "Mihai Stan",
     location: "Iași, România",
-    skills:
+    resources:
       "Sunt pictor în ulei și muralist — portret, picturi murale de mari dimensiuni și palete de culoare care poartă o stare. Iau comenzi de la pânze mici la pereți cât o clădire și mă ocup de pregătirea suprafeței și de finisaje rezistente la exterior.",
     passions:
       "Intru în flow amestecând o culoare până când poartă exact starea pe care o caut; iubesc clipa în care un chip de pe pânză începe să-ți răspundă.",
@@ -115,10 +114,10 @@ const personas: Persona[] = [
     socials: { website: "behance.net/mihaistan", instagram: "instagram.com/mihaipaints" },
   },
   {
-    loginEmail: "carmen.velasco@example.com",
+    loginEmail: "cosmin.velea@example.com",
     name: "Cosmin Velea",
     location: "București, România",
-    skills:
+    resources:
       "Construiesc brand și creștere de la poziționare până la canale — mesaj, strategie de conținut, campanii și email pe tot ciclul de viață. Caut povestea care face un produs să se lege și o transform într-un motor de creștere care se repetă.",
     passions:
       "Mă energizează clipa în care povestea adevărată a unui brand se așază în sfârșit la locul ei; iubesc când un mesaj clar devine avânt real.",
@@ -130,7 +129,7 @@ const personas: Persona[] = [
     loginEmail: "tudor.apostol@example.com",
     name: "Tudor Apostol",
     location: "Cluj-Napoca, România",
-    skills:
+    resources:
       "Țin proiecte complexe pe drumul lor — definire, planificare, coordonare între echipe și proiectare de procese. Aduc structură calmă în haos: jaloane clare, oameni responsabili și urmărirea aceea neglamuroasă care duce lucrurile la capăt.",
     passions:
       "Mă bucur în liniște când haosul se așază într-un plan clar pe care toți îl pot urma; găsesc calm în a transforma o harababură în avânt.",
@@ -139,10 +138,10 @@ const personas: Persona[] = [
     socials: { linkedin: "linkedin.com/in/tudorapostol" },
   },
   {
-    loginEmail: "elena.radu@example.com",
+    loginEmail: "emil.radu@example.com",
     name: "Emil Radu",
     location: "București, România",
-    skills:
+    resources:
       "Lucrez cu fondatori și lideri seniori — cultură de echipă, decizii sub presiune, conversații grele și creșterea managerilor. Îi ajut pe lideri să-și vadă punctele oarbe și să construiască echipe care au încredere unele în altele.",
     passions:
       "Sunt cel mai viu în încăpere când un lider își vede punctul orb și ceva se schimbă; iubesc liniștea încărcată dinaintea unei revelații.",
@@ -154,7 +153,7 @@ const personas: Persona[] = [
     loginEmail: "radu.pop@example.com",
     name: "Radu Pop",
     location: "Sibiu, România",
-    skills:
+    resources:
       "Proiectez și pun în funcțiune sisteme electrice — proiectare electrică pentru clădiri, calcule de sarcină, tablouri, racordare la rețea și instalații solare cu baterii. Duc lucrurile de la schema monofilară până la sistemul verificat și pus sub tensiune.",
     passions:
       "Iubesc clipa în care un sistem gândit de mine pornește curat prima dată; intru în flow urmărind un circuit până când fiecare sarcină se echilibrează.",
@@ -163,10 +162,10 @@ const personas: Persona[] = [
     socials: { phone: "+40 723 456 789", linkedin: "linkedin.com/in/radupop" },
   },
   {
-    loginEmail: "sanda.niculae@example.com",
+    loginEmail: "sandu.niculae@example.com",
     name: "Sandu Niculae",
     location: "Timișoara, România",
-    skills:
+    resources:
       "Proiectez hardware embedded și firmware — cablaj PCB, microcontrolere, integrare de senzori, IoT de consum mic și aducerea la viață a plăcilor noi. Duc un produs de la schemă, prin prototip, până la hardware care se poate fabrica.",
     passions:
       "Mă luminez când o placă proaspăt lipită pornește prima oară; pierd ore vânând un bug până la un singur registru care se poartă urât.",
@@ -175,10 +174,10 @@ const personas: Persona[] = [
     socials: { website: "github.com/sandun", linkedin: "linkedin.com/in/sanduniculae" },
   },
   {
-    loginEmail: "sofia.lindgren@example.com",
+    loginEmail: "sorin.lungu@example.com",
     name: "Sorin Lungu",
     location: "Brașov, România",
-    skills:
+    resources:
       "Compun și produc muzică pentru film, jocuri și sala de concert — orchestrație, texturi electronice și teme muzicale. Citesc o scenă și scriu muzica de care are nevoie; pot să dirijez și să închei mixajul final.",
     passions:
       "Mă pierd ore în partitură, căutând motivul pe care îl cere o scenă; sunt cel mai prezent când sunetul și povestea se prind unul de altul.",
@@ -190,7 +189,7 @@ const personas: Persona[] = [
     loginEmail: "dragos.ilie@example.com",
     name: "Dragoș Ilie",
     location: "Cluj-Napoca, România",
-    skills:
+    resources:
       "Îndrum fondatori la început de drum — validarea ideii, strategie de finanțare, pitch și narațiune, și ocolirea greșelilor clasice. Am construit și vândut companii și dau sfaturi directe, din experiență.",
     passions:
       "Mă energizează scânteia din ochii unui fondator care tocmai și-a găsit unghiul; iubesc claritatea cu miză mare a unui pariu timpuriu și formator.",
@@ -199,10 +198,10 @@ const personas: Persona[] = [
     socials: { linkedin: "linkedin.com/in/dragosilie", x: "x.com/dragosilie" },
   },
   {
-    loginEmail: "petra.novak@example.com",
+    loginEmail: "petru.novac@example.com",
     name: "Petru Novac",
     location: "Cluj-Napoca, România",
-    skills:
+    resources:
       "Proiectez experiențe de produs cap-coadă — cercetare cu utilizatori, fluxuri, wireframe, UI de mare fidelitate și design systems. Fac puntea între ce au nevoie oamenii și ce se poate construi, și testez ca să fiu sigur.",
     passions:
       "Intru în flow când un flux încâlcit devine în sfârșit evident; iubesc să văd un om real trecând lin prin ceva ce am proiectat.",
@@ -214,7 +213,7 @@ const personas: Persona[] = [
     loginEmail: "alex.morgan@example.com",
     name: "Alex Moraru",
     location: "Cluj-Napoca, România",
-    skills:
+    resources:
       "Sunt fotograf de documentar și portret — evenimente, ședințe de brand și povești foto de lungă durată. Lucrez mult cu lumina naturală, pun oamenii în largul lor și editez o ședință într-o poveste coerentă.",
     passions:
       "Sunt cel mai prezent vânând cadrul în care lumina, momentul și omul se aliniază; iubesc liniștea editării unei ședințe într-o poveste.",
@@ -226,7 +225,7 @@ const personas: Persona[] = [
     loginEmail: "vlad.georgescu@example.com",
     name: "Vlad Georgescu",
     location: "Brașov, România",
-    skills:
+    resources:
       "Fac mobilă la comandă și tâmplărie de interior — îmbinări, mobilă din lemn masiv, piese încastrate și restaurarea pieselor vechi. Pornesc de la o schiță și ajung la un obiect îmbinat manual, care ține generații.",
     passions:
       "Mă pierd în ritmul tăierii unei îmbinări strânse cu mâna; iubesc mirosul de lemn proaspăt tăiat și o piesă care mă va supraviețui.",
@@ -235,10 +234,10 @@ const personas: Persona[] = [
     socials: { phone: "+40 745 678 901", website: "georgescuwood.ro", instagram: "instagram.com/vladwoodwork" },
   },
   {
-    loginEmail: "maria.costa@example.com",
+    loginEmail: "marian.costea@example.com",
     name: "Marian Costea",
     location: "Iași, România",
-    skills:
+    resources:
       "Transform datele în decizii — modele predictive, experimente și testare A/B, sisteme de recomandare și explicarea limpede a rezultatelor pentru oameni non-tehnici. Mă simt la fel de bine într-un notebook și într-o ședință de strategie.",
     passions:
       "Mă luminez când un model scoate la iveală un tipar pe care nu-l văzuse nimeni; iubesc clipa în care datele transformă o bănuială într-o decizie clară.",
@@ -247,10 +246,10 @@ const personas: Persona[] = [
     socials: { website: "github.com/mariancostea", linkedin: "linkedin.com/in/mariancostea" },
   },
   {
-    loginEmail: "irina.bancila@example.com",
+    loginEmail: "ionut.bancila@example.com",
     name: "Ionuț Băncilă",
     location: "Iași, România",
-    skills:
+    resources:
       "Modelez și ridic la roată ceramică funcțională și sculpturală — chimia glazurilor, lucrul la roată și arderea în cuptor. Țin ateliere și iau comenzi pentru veselă și piese de galerie.",
     passions:
       "Sunt cel mai prezent la roată, centrând lutul până se face liniște în cameră; iubesc pariul deschiderii cuptorului după o ardere.",
@@ -262,7 +261,7 @@ const personas: Persona[] = [
     loginEmail: "andrei.lupu@example.com",
     name: "Andrei Lupu",
     location: "București, România",
-    skills:
+    resources:
       "Înregistrez, mixez și fac mastering — tracking în studio, sunet live, post-producție pentru film și tratarea acustică a camerelor. Cunosc și aparatura, și urechea, și scot un rezultat curat și echilibrat în condiții reale.",
     passions:
       "Mă pierd într-un mix căutând clipa în care o piesă începe brusc să respire; iubesc să reglez o cameră până sună în sfârșit adevărat.",
@@ -271,10 +270,10 @@ const personas: Persona[] = [
     socials: { website: "soundcloud.com/andreilupu", linkedin: "linkedin.com/in/andreilupu" },
   },
   {
-    loginEmail: "diana.marinescu@example.com",
+    loginEmail: "darius.marinescu@example.com",
     name: "Darius Marinescu",
     location: "Cluj-Napoca, România",
-    skills:
+    resources:
       "Adun oameni și fac grupurile să funcționeze — design de evenimente, facilitare de ateliere, decizii de grup și construirea de comunități de voluntari. Creez spații în care oamenii se simt în siguranță să contribuie și unde deciziile chiar se iau.",
     passions:
       "Sunt cel mai viu când o cameră de străini devine un grup care decide împreună; iubesc să creez momentul în care oamenii se simt în siguranță să vorbească.",
@@ -345,13 +344,21 @@ async function main() {
 
   let created = 0;
   let reused = 0;
-  for (const p of personas) {
+  for (const [personaIndex, p] of personas.entries()) {
     const before = await findAuthIdByEmail(p.loginEmail);
     const memberId = await ensureAuthUser(p);
     if (before) reused++;
     else created++;
 
-    const m = await admin.from("members").upsert({ id: memberId, email: p.loginEmail }, { onConflict: "id" });
+    const m = await admin.from("members").upsert(
+      {
+        id: memberId,
+        email: p.loginEmail,
+        // Keep the admin-only product surface reachable after a clean reset.
+        role: personaIndex === 0 ? "admin" : "member",
+      },
+      { onConflict: "id" },
+    );
     if (m.error) throw new Error(`members ${p.loginEmail}: ${m.error.message}`);
 
     const { firstName, lastName } = splitName(p.name);
@@ -361,7 +368,6 @@ async function main() {
         first_name: firstName,
         last_name: lastName,
         location: p.location,
-        skills: p.skills,
         passions: p.passions,
         heart_project_description: p.heartProject,
         heart_project_seeking: false,
@@ -369,6 +375,56 @@ async function main() {
       { onConflict: "member_id" },
     );
     if (pr.error) throw new Error(`profiles ${p.loginEmail}: ${pr.error.message}`);
+
+    const normalizeDescription = (value: string) =>
+      value.trim().replace(/\s+/g, " ").slice(0, 255).trim();
+    const description = normalizeDescription(p.resources);
+    let resourceRows: Array<{
+      description: string;
+      classification: "free" | "paid";
+      position: number;
+    }>;
+
+    // Representative fixtures required by the Resources PRD: only-free,
+    // only-paid, mixed, ordered, and near-limit category sets.
+    if (personaIndex === 3) {
+      const communityArtResources = [
+        description,
+        "Facilitez un atelier introductiv de colaj cu materiale recuperate.",
+        "Ajut o comunitate să transforme o idee într-un concept de instalație publică.",
+        "Ofer feedback pe portofolii pentru artiști aflați la început.",
+        "Ghidez documentarea vizuală a unui cartier sau a unei comunități.",
+        "Fac o sesiune de idei pentru reutilizarea creativă a materialelor găsite.",
+        "Ajut la planificarea logistică a unei intervenții artistice temporare.",
+        "Fac mentorat pentru colaborări artistice cu grupuri locale.",
+        "Ofer o conversație de orientare pentru o primă comandă de artă publică.",
+      ];
+      resourceRows = communityArtResources.map((resource, position) => ({
+        description: normalizeDescription(resource),
+        classification: "free" as const,
+        position,
+      }));
+    } else {
+      const classification = personaIndex % 3 === 1 ? "paid" as const : "free" as const;
+      resourceRows = [{ description, classification, position: 0 }];
+      if (personaIndex % 3 === 2) {
+        resourceRows.push({
+          description: normalizeDescription(`Consultație personalizată: ${description}`),
+          classification: "paid",
+          position: 0,
+        });
+      }
+    }
+    const removed = await admin.from("resources").delete().eq("member_id", memberId);
+    if (removed.error) throw new Error(`resources cleanup ${p.loginEmail}: ${removed.error.message}`);
+    for (const resource of resourceRows) {
+      const embedding = await gatewayEmbedder(resource.description);
+      const saved = await admin.from("resources").insert({
+        member_id: memberId, ...resource, embedding: JSON.stringify(embedding),
+        embedding_input: resource.description,
+      });
+      if (saved.error) throw new Error(`resources ${p.loginEmail}: ${saved.error.message}`);
+    }
 
     const s = await admin.from("socials").upsert(
       {
@@ -384,14 +440,6 @@ async function main() {
       { onConflict: "member_id" },
     );
     if (s.error) throw new Error(`socials ${p.loginEmail}: ${s.error.message}`);
-
-    // Embed the persona so People Search is testable end-to-end straight after a
-    // reset (story 29). This is the one place a reset reaches the network -- the
-    // real Gateway embed -- so it needs AI_GATEWAY_API_KEY in the env file.
-    await embedMember(
-      { embedder: gatewayEmbedder, db: supabaseEmbedMemberClient(admin) },
-      memberId,
-    );
 
     console.log(`✓ ${p.name} <${p.loginEmail}> ${before ? "(reused)" : "(created)"} ${memberId}`);
   }

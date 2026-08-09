@@ -1,67 +1,40 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { PGlite } from "@electric-sql/pglite";
-import { embedMember } from "@/lib/people-search/embed-member";
-import { buildEmbeddingInput } from "@/lib/people-search/embedding-input";
-import { createTestDb, pgliteEmbedMemberAdapter, seedMember } from "./db";
+import { embedProfileContext, embedResource } from "@/lib/people-search/embed-member";
+import { createTestDb, pgliteEmbedResourceAdapter, seedMember } from "./db";
 
-// Seam B (issue #23): embedMember reads a Profile, builds the input, embeds, and
-// writes the vector + the exact text + the timestamp. Why it matters: a Profile
-// edit must re-embed exactly that one Member's row -- never anyone else's.
-describe("embedMember", () => {
+describe("embedResource", () => {
   let db: PGlite;
-  // Deterministic fake embedder: no network. Encodes the input length so the
-  // test can prove the *built input* (not the raw skills) was what got embedded.
-  const fakeEmbedder = async (input: string) => [input.length, 1, 0];
+  beforeEach(async () => { db = await createTestDb(); });
+  afterEach(async () => { await db.close(); });
 
-  beforeEach(async () => {
-    db = await createTestDb();
+  it("writes the exact Resource embedding without changing another Resource", async () => {
+    const memberId = await seedMember(db, { firstName: "Ana", lastName: "Pop",
+      resources: [{ description: "Mentorat tehnic", classification: "free" }, { description: "Audit software", classification: "paid" }] });
+    const rows = await db.query<{ id: string; description: string }>("select id, description from resources where member_id=$1 order by position", [memberId]);
+    const target = rows.rows[0];
+    await embedResource({ embedder: async (input) => [input.length, 1, 0], db: pgliteEmbedResourceAdapter(db) }, target.id);
+    const saved = await db.query<{ embedding_input: string }>("select embedding_input from resources where id=$1", [target.id]);
+    expect(saved.rows[0].embedding_input).toBe("Mentorat tehnic");
   });
-  afterEach(async () => {
-    await db.close();
-  });
+});
 
-  it("writes embedding, embedding_input and embedded_at for that member only", async () => {
-    const target = await seedMember(db, {
-      firstName: "Bob",
-      lastName: "Crăciun",
-      skills: "natural materials, timber framing",
-      passions: "shaping a wall that breathes",
-      heartProjectDescription: "Homes that breathe",
-      heartProjectSeeking: false,
-    });
-    const other = await seedMember(db, { firstName: "Ana", lastName: "Dumitrescu" });
-
-    const { embeddingInput } = await embedMember(
-      { embedder: fakeEmbedder, db: pgliteEmbedMemberAdapter(db) },
-      target,
-    );
-
-    // The text embedded is exactly what buildEmbeddingInput produces.
-    const expectedInput = buildEmbeddingInput({
-      skills: "natural materials, timber framing",
-      passions: "shaping a wall that breathes",
-      heartProjectDescription: "Homes that breathe",
-      heartProjectSeeking: false,
-    });
-    expect(embeddingInput).toBe(expectedInput);
-
-    const row = await db.query<{
-      embedding: number[] | null;
-      embedding_input: string | null;
-      embedded_at: string | null;
-    }>(
-      `select embedding, embedding_input, embedded_at from profiles where member_id = $1`,
-      [target],
-    );
-    expect(row.rows[0].embedding).toEqual([expectedInput.length, 1, 0]);
-    expect(row.rows[0].embedding_input).toBe(expectedInput);
-    expect(row.rows[0].embedded_at).not.toBeNull();
-
-    // The other Member's row is untouched -- re-embed is per-row.
-    const untouched = await db.query<{ embedding: number[] | null }>(
-      `select embedding from profiles where member_id = $1`,
-      [other],
-    );
-    expect(untouched.rows[0].embedding).toBeNull();
+describe("embedProfileContext", () => {
+  it("updates only the per-Member Profile-context vector", async () => {
+    let write: { id: string; embeddingInput: string } | undefined;
+    const result = await embedProfileContext({
+      embedder: async (input) => [input.length, 0, 0],
+      db: {
+        getProfileContext: async () => ({ data: {
+          passions: "permacultură", heartProjectDescription: "grădini comunitare", heartProjectSeeking: false,
+        }, error: null }),
+        writeProfileContextEmbedding: async (data) => {
+          write = { id: data.id, embeddingInput: data.embeddingInput };
+          return { error: null };
+        },
+      },
+    }, "member-1");
+    expect(result.embeddingInput).toContain("Pasiuni: permacultură");
+    expect(write).toEqual({ id: "member-1", embeddingInput: result.embeddingInput });
   });
 });

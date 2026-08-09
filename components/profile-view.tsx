@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { type MemberProfile, type SocialKey } from "@/lib/profile/get";
 
 // One presentational Profile, rendering both /profile and /profile/{memberId}.
@@ -44,6 +45,8 @@ export function ProfileView({
     const value = profile.socials[key];
     return value ? [{ key, value }] : [];
   });
+  const freeResources = profile.resources.filter((resource) => resource.classification === "free");
+  const paidResources = profile.resources.filter((resource) => resource.classification === "paid");
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
@@ -56,14 +59,31 @@ export function ProfileView({
         )}
       </div>
       <p className="mt-1 text-sm text-zinc-300">{profile.location}</p>
+      {isOwn && (
+        <Link
+          href="/profile/resources"
+          className="mt-5 inline-flex rounded-lg border border-zinc-500 px-3 py-2 text-sm font-semibold text-white hover:border-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        >
+          Editează resursele
+        </Link>
+      )}
 
       <section className="mt-8 space-y-6">
-        <div>
-          <h2 className="text-sm font-semibold text-zinc-300">Abilități</h2>
-          <p className="mt-1 whitespace-pre-line text-sm text-white">
-            {profile.skills}
-          </p>
-        </div>
+        {([
+          ["Resurse gratis", freeResources],
+          ["Resurse contra cost", paidResources],
+        ] as const).map(([title, resources]) => resources.length > 0 ? (
+          <div key={title}>
+            <h2 className="text-sm font-semibold text-zinc-300">{title}</h2>
+            <ul className="mt-2 space-y-2">
+              {resources.map((resource) => (
+                <li key={resource.id} className="whitespace-pre-wrap break-words rounded-lg border border-zinc-700 px-3 py-2 text-sm text-white">
+                  {resource.description}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null)}
         <div>
           <h2 className="text-sm font-semibold text-zinc-300">Pasiuni</h2>
           <p className="mt-1 whitespace-pre-line text-sm text-white">

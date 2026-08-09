@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthedMenu } from "@/components/authed-menu";
+import { MemberCard } from "@/components/member-card";
 import {
   listMembers,
   supabaseListMembersClient,
-  type MemberCard,
 } from "@/lib/members/list";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -34,42 +33,10 @@ export default async function MembersPage() {
         <h1 className="text-2xl font-semibold">Membri</h1>
         <ul className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4">
           {members.map((m) => (
-            <Card key={m.id} member={m} isOwn={m.id === user.id} />
+            <MemberCard key={m.id} member={m} isOwn={m.id === user.id} />
           ))}
         </ul>
       </main>
     </>
-  );
-}
-
-function Card({ member, isOwn }: { member: MemberCard; isOwn: boolean }) {
-  // Tapping your own card goes to your editable /profile; anyone else's to their
-  // read-only /profile/{id}.
-  const href = isOwn ? "/profile" : `/profile/${member.id}`;
-  const heartProject = member.heartProjectSeeking
-    ? "În căutare"
-    : member.heartProjectDescription;
-
-  return (
-    <li>
-      <Link
-        href={href}
-        className="flex h-full flex-col rounded-xl border border-zinc-600 bg-zinc-700 p-4 transition hover:border-zinc-500 hover:shadow-sm"
-      >
-        <h2 className="font-semibold text-white">{member.name}</h2>
-        <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
-          Proiect de Suflet
-        </p>
-        <p className="mt-0.5 line-clamp-3 text-sm text-white">
-          {heartProject}
-        </p>
-        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-zinc-300">
-          Abilități
-        </p>
-        <p className="mt-0.5 line-clamp-3 text-sm text-white">
-          {member.skills}
-        </p>
-      </Link>
-    </li>
   );
 }

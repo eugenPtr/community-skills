@@ -63,7 +63,6 @@ describe("member-readable RLS (live local stack)", () => {
       first_name: "RLS",
       last_name: "Member",
       location: "Bucharest",
-      skills: "testing",
       passions: "correctness",
       heart_project_description: "A trustworthy network",
       heart_project_seeking: false,
@@ -71,6 +70,9 @@ describe("member-readable RLS (live local stack)", () => {
     await service
       .from("socials")
       .insert({ member_id: memberId, website: "https://rls.example.com" });
+    await service.from("resources").insert({ member_id: memberId,
+      description: "Testare RLS", classification: "free", position: 0,
+      embedding: JSON.stringify(Array(1536).fill(0)), embedding_input: "Testare RLS" });
   });
 
   afterAll(async () => {
@@ -80,20 +82,23 @@ describe("member-readable RLS (live local stack)", () => {
     if (nonMemberId) await service.auth.admin.deleteUser(nonMemberId);
   });
 
-  it("lets a Member read members, profiles and socials", async () => {
+  it("lets a Member read members, profiles, socials and Resources", async () => {
     const client = await signedInClient(MEMBER_EMAIL);
 
     const members = await client.from("members").select("id");
     const profiles = await client.from("profiles").select("member_id");
     const socials = await client.from("socials").select("member_id");
+    const resources = await client.from("resources").select("member_id, description");
 
     expect(members.error).toBeNull();
     expect(profiles.error).toBeNull();
     expect(socials.error).toBeNull();
+    expect(resources.error).toBeNull();
     // At minimum the Member can see their own row in each table.
     expect(members.data?.length ?? 0).toBeGreaterThan(0);
     expect(profiles.data?.length ?? 0).toBeGreaterThan(0);
     expect(socials.data?.length ?? 0).toBeGreaterThan(0);
+    expect(resources.data?.some((row) => row.member_id === memberId)).toBe(true);
   });
 
   it("shows an authenticated non-Member nothing in any table", async () => {
@@ -102,10 +107,29 @@ describe("member-readable RLS (live local stack)", () => {
     const members = await client.from("members").select("id");
     const profiles = await client.from("profiles").select("member_id");
     const socials = await client.from("socials").select("member_id");
+    const resources = await client.from("resources").select("member_id");
 
     // RLS denial is silent: no error, zero rows.
     expect(members.data).toEqual([]);
     expect(profiles.data).toEqual([]);
     expect(socials.data).toEqual([]);
+    expect(resources.data).toEqual([]);
+  });
+
+  it("prevents a Member from mutating another Member's Resources", async () => {
+    const other = await service.auth.admin.createUser({ email: `rls-other-${suffix}@example.com`, password: PASSWORD, email_confirm: true });
+    if (other.error) throw other.error;
+    const otherId = other.data.user.id;
+    const otherEmail = other.data.user.email!;
+    await service.from("members").insert({ id: otherId, email: otherEmail });
+    const client = await signedInClient(MEMBER_EMAIL);
+    const insert = await client.from("resources").insert({ member_id: otherId, description: "Interzis", classification: "free", position: 0,
+      embedding: JSON.stringify(Array(1536).fill(0)), embedding_input: "Interzis" });
+    const update = await client.from("resources").update({ position: 1 }).eq("member_id", otherId);
+    const remove = await client.from("resources").delete().eq("member_id", otherId);
+    expect(insert.error).not.toBeNull();
+    expect(update.data).toBeNull();
+    expect(remove.data).toBeNull();
+    await service.auth.admin.deleteUser(otherId);
   });
 });

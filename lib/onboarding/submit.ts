@@ -1,8 +1,7 @@
-import { claimInvite, type InviteRpcClient } from "@/lib/invites/claim";
-import {
-  isPossiblePhoneNumber,
-  parsePhoneNumber,
-} from "libphonenumber-js/max";
+import { isPossiblePhoneNumber, parsePhoneNumber } from "libphonenumber-js/max";
+import type { Embedder } from "@/lib/people-search/embed-member";
+import { buildProfileContextEmbeddingInput } from "@/lib/people-search/embedding-input";
+import { normalizeResources, type ResourceInput } from "@/lib/resources/model";
 
 export type SubmitOnboardingResult =
   | { kind: "ok" }
@@ -11,120 +10,60 @@ export type SubmitOnboardingResult =
   | { kind: "missingFields" };
 
 export interface SocialsInput {
-  phone?: string;
-  email?: string;
-  website?: string;
-  linkedin?: string;
-  facebook?: string;
-  instagram?: string;
-  x?: string;
+  phone?: string; email?: string; website?: string; linkedin?: string;
+  facebook?: string; instagram?: string; x?: string;
 }
 
-export interface OnboardingDbClient extends InviteRpcClient {
-  insertProfile(data: {
-    memberId: string;
-    firstName: string;
-    lastName: string;
-    location: string;
-    skills: string;
-    passions: string;
-    heartProjectDescription: string | null;
-    heartProjectSeeking: boolean;
-  }): PromiseLike<{ error: { message: string } | null }>;
-  upsertSocials(data: {
-    memberId: string;
-    phone: string | null;
-    email: string | null;
-    website: string | null;
-    linkedin: string | null;
-    facebook: string | null;
-    instagram: string | null;
-    x: string | null;
-  }): PromiseLike<{ error: { message: string } | null }>;
+interface OnboardingPayload {
+  userId: string; email: string; code: string; firstName: string; lastName: string;
+  location: string; passions: string; heartProjectSeeking: boolean;
+  heartProjectDescription?: string; resources: ResourceInput[]; socials?: SocialsInput;
 }
 
-const SOCIALS_FIELDS = [
-  "phone",
-  "email",
-  "website",
-  "linkedin",
-  "facebook",
-  "instagram",
-  "x",
-] as const;
+export interface OnboardingDbClient {
+  completeOnboarding(data: Omit<OnboardingPayload, "resources" | "socials"> & {
+    resources: Array<ResourceInput & { position: number; embedding: number[] }>;
+    profileContextEmbedding: number[];
+    profileContextEmbeddingInput: string;
+    socials: Record<string, string | null>;
+  }): PromiseLike<{ error: { code?: string; message: string } | null }>;
+}
+
+const SOCIAL_FIELDS = ["phone", "email", "website", "linkedin", "facebook", "instagram", "x"] as const;
 
 export async function submitOnboarding(
-  client: OnboardingDbClient,
-  opts: {
-    userId: string;
-    email: string;
-    code: string;
-    firstName: string;
-    lastName: string;
-    location: string;
-    skills: string;
-    passions: string;
-    heartProjectSeeking: boolean;
-    heartProjectDescription?: string;
-    socials?: SocialsInput;
-  },
+  deps: { db: OnboardingDbClient; embedder: Embedder },
+  opts: OnboardingPayload,
 ): Promise<SubmitOnboardingResult> {
   const phone = opts.socials?.phone?.trim() ?? "";
   const contactEmail = opts.socials?.email?.trim() ?? "";
-  const validContactEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail);
-  const validPhone =
-    phone.startsWith("+") && isPossiblePhoneNumber(phone);
-
-  if (
-    !opts.firstName.trim() ||
-    !opts.lastName.trim() ||
-    !opts.location.trim() ||
-    !opts.skills.trim() ||
-    !opts.passions.trim() ||
-    (!opts.heartProjectSeeking && !opts.heartProjectDescription?.trim()) ||
-    !validPhone ||
-    !validContactEmail
-  ) {
+  const resources = normalizeResources(opts.resources);
+  if (!opts.firstName.trim() || !opts.lastName.trim() || !opts.location.trim() ||
+      !opts.passions.trim() || (!opts.heartProjectSeeking && !opts.heartProjectDescription?.trim()) ||
+      !phone.startsWith("+") || !isPossiblePhoneNumber(phone) ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail) || !resources) {
     return { kind: "missingFields" };
   }
 
-  const claim = await claimInvite(client, {
-    code: opts.code,
-    userId: opts.userId,
-    email: opts.email,
-  });
-
-  if (claim.kind === "invalid") return { kind: "invalidCode" };
-  if (claim.kind === "alreadyClaimed") return { kind: "alreadyClaimed" };
-
-  const { error } = await client.insertProfile({
-    memberId: opts.userId,
-    firstName: opts.firstName,
-    lastName: opts.lastName,
-    location: opts.location,
-    skills: opts.skills,
-    passions: opts.passions,
-    heartProjectDescription: opts.heartProjectDescription ?? null,
-    heartProjectSeeking: opts.heartProjectSeeking,
-  });
-
-  if (error) throw new Error(`insertProfile failed: ${error.message}`);
-
-  const socials = Object.fromEntries(
-    SOCIALS_FIELDS.map((f) => [f, opts.socials?.[f]?.trim() || null]),
-  ) as Record<(typeof SOCIALS_FIELDS)[number], string | null>;
+  // Index first. If Gateway embedding fails, no Member/Profile/Invite/Resource write occurs.
+  const profileContextEmbeddingInput = buildProfileContextEmbeddingInput(opts);
+  const [profileContextEmbedding, indexed] = await Promise.all([
+    deps.embedder(profileContextEmbeddingInput),
+    Promise.all(resources.map(async (resource) => ({
+    ...resource,
+    position: resources.filter((r) => r.classification === resource.classification).indexOf(resource),
+    embedding: await deps.embedder(resource.description),
+    }))),
+  ]);
+  const socials = Object.fromEntries(SOCIAL_FIELDS.map((field) => [field, opts.socials?.[field]?.trim() || null]));
   socials.phone = parsePhoneNumber(phone).number;
   socials.email = contactEmail;
 
-  if (Object.values(socials).some((v) => v !== null)) {
-    const { error: socialsError } = await client.upsertSocials({
-      memberId: opts.userId,
-      ...socials,
-    });
-    if (socialsError) {
-      throw new Error(`upsertSocials failed: ${socialsError.message}`);
-    }
-  }
-
-  return { kind: "ok" };
+  const { error } = await deps.db.completeOnboarding({
+    ...opts, resources: indexed, socials, profileContextEmbedding, profileContextEmbeddingInput,
+  });
+  if (!error) return { kind: "ok" };
+  if (error.code === "P0001") return { kind: "invalidCode" };
+  if (error.code === "P0002") return { kind: "alreadyClaimed" };
+  throw new Error(`completeOnboarding failed: ${error.message}`);
 }

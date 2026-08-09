@@ -6,14 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Git workflow
 
-- Every new piece of work — feature, fix, chore, style, docs, etc. — starts on a **fresh branch cut from `origin/main`**, never from whatever branch happens to be checked out. Fetch first so you branch from the current remote tip:
-
-  ```sh
-  git fetch origin
-  git switch -c <type>/<short-desc> origin/main
-  ```
-
-- Branch name is `<type>/<short-desc>`, where `<type>` matches the Conventional Commit types used in this repo (`feat`, `fix`, `chore`, `style`, `docs`, …) and `<short-desc>` is kebab-case (e.g. `feat/people-search`, `fix/invite-claim-race`).
+- Implement all work on the currently checked-out branch unless the user explicitly specifies a different branch.
 - Never commit directly to `main`.
 
 # Tooling
@@ -46,4 +39,4 @@ Stack is Supabase + Vercel (ADR-0003). Every change to these must go through the
 # People Search (AI)
 
 - Embeddings and LLM answers both go through the **Vercel AI Gateway** (one key, `AI_GATEWAY_API_KEY`) — see ADR-0008. Embeddings: `openai/text-embedding-3-small` (1536-dim). Answers: `claude-haiku-4-5`. Never wire providers directly.
-- One combined embedding per Member, built by a single `buildEmbeddingInput` helper (skills + heart project + passions) and written by the `embedMember(id)` primitive — reused by onboarding save, profile edit, the seed loop, and backfill.
+- Each Resource is embedded independently from its normalized description; synchronous indexing must succeed before Resources are published.

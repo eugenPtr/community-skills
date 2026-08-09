@@ -1,15 +1,30 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-// One Member's card on the Members listing. Cards carry name, Heart Project and Skills only
-// -- location, Passions and Social Links are Profile-page-only (issue #17).
+export interface MemberResourcePreview {
+  description: string;
+  classification: "free" | "paid";
+  position: number;
+}
+
+interface MemberCardRow {
+  id: string;
+  name: string;
+  heartProjectDescription: string | null;
+  heartProjectSeeking: boolean;
+  resources: MemberResourcePreview[];
+}
+
+// One Member's card on the Members listing. Location, Passions and Social Links
+// remain Profile-page-only (issue #17).
 export interface MemberCard {
   id: string;
   name: string;
-  skills: string;
   heartProjectDescription: string | null;
   // The seeking flag, not the description, decides "Seeking one" on a card, so
   // the glossary's has-one-or-seeking distinction survives an empty description.
   heartProjectSeeking: boolean;
+  resources: MemberResourcePreview[];
+  resourceCount: number;
 }
 
 // The seam `listMembers` reads through: a Supabase client in production, a
@@ -17,7 +32,7 @@ export interface MemberCard {
 // in `listMembers` so it is asserted once, independent of the data source.
 export interface ListMembersClient {
   fetchMemberCards(): PromiseLike<{
-    data: MemberCard[] | null;
+    data: MemberCardRow[] | null;
     error: { message: string } | null;
   }>;
 }
@@ -29,9 +44,23 @@ export async function listMembers(
 ): Promise<MemberCard[]> {
   const { data, error } = await client.fetchMemberCards();
   if (error) throw new Error(`listMembers failed: ${error.message}`);
-  return [...(data ?? [])].sort((a, b) =>
-    a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
-  );
+  return [...(data ?? [])]
+    .map((member) => {
+      const resources = [...member.resources].sort((a, b) => {
+        if (a.classification !== b.classification) {
+          return a.classification === "free" ? -1 : 1;
+        }
+        return a.position - b.position;
+      });
+      return {
+        ...member,
+        resources: resources.slice(0, 2),
+        resourceCount: resources.length,
+      };
+    })
+    .sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    );
 }
 
 // Production adapter over the cookie-bound server client. RLS (ADR-0006) admits
@@ -44,16 +73,16 @@ export function supabaseListMembersClient(
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "member_id, first_name, last_name, skills, heart_project_description, heart_project_seeking",
+          "member_id, first_name, last_name, heart_project_description, heart_project_seeking, resources(description, classification, position)",
         );
       return {
         data:
           data?.map((r) => ({
             id: r.member_id,
             name: `${r.first_name} ${r.last_name}`,
-            skills: r.skills,
             heartProjectDescription: r.heart_project_description,
             heartProjectSeeking: r.heart_project_seeking,
+            resources: r.resources,
           })) ?? null,
         error: error ? { message: error.message } : null,
       };

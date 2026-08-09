@@ -11,6 +11,7 @@ import "react-phone-number-input/style.css";
 import { getExampleNumber, isPossiblePhoneNumber } from "libphonenumber-js/max";
 import examples from "libphonenumber-js/mobile/examples";
 import { toast } from "sonner";
+import { ResourceEditor, type EditableResource } from "@/components/resource-editor";
 
 type OnboardingFormProps = {
   invite: string;
@@ -49,15 +50,15 @@ export default function OnboardingForm({
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const draftKey = `onboarding-draft:${memberId}:${invite}`;
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [values, setValues] = useState({
     firstName: "",
     lastName: "",
     location: "",
-    skills: "",
     passions: "",
     heartProject: null as boolean | null,
     heartProjectDescription: "",
+    resources: [] as EditableResource[],
     phone: "",
     contactEmail: loginEmail,
     website: "",
@@ -81,12 +82,12 @@ export default function OnboardingForm({
           const draft = JSON.parse(serialized) as {
             version?: number;
             expiresAt?: number;
-            step?: 1 | 2 | 3;
+            step?: 1 | 2 | 3 | 4;
             values?: typeof values;
             phoneCountry?: Country;
           };
           if (
-            draft.version !== 1 ||
+            draft.version !== 3 ||
             !draft.expiresAt ||
             draft.expiresAt <= Date.now() ||
             !draft.values
@@ -101,7 +102,6 @@ export default function OnboardingForm({
               draft.values.location,
             ].every((value) => value?.trim());
             const profileComplete =
-              draft.values.skills?.trim() &&
               draft.values.passions?.trim() &&
               draft.values.heartProject !== null &&
               (draft.values.heartProject === false ||
@@ -109,9 +109,9 @@ export default function OnboardingForm({
             setStep(
               !identityComplete
                 ? 1
-                : draft.step === 3 && profileComplete
-                  ? 3
-                  : (Math.min(2, draft.step ?? 1) as 1 | 2),
+                : draft.step === 4 && profileComplete && draft.values.resources?.length > 0
+                  ? 4
+                  : (Math.min(3, draft.step ?? 1) as 1 | 2 | 3),
             );
           }
         }
@@ -131,7 +131,7 @@ export default function OnboardingForm({
     localStorage.setItem(
       draftKey,
       JSON.stringify({
-        version: 1,
+        version: 3,
         expiresAt: Date.now() + DRAFT_TTL_MS,
         step,
         values,
@@ -140,7 +140,7 @@ export default function OnboardingForm({
     );
   }, [draftKey, draftLoaded, phoneCountry, step, values]);
 
-  function update(field: keyof typeof values, value: string) {
+  function update(field: Exclude<keyof typeof values, "resources">, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
     setInvalid((current) => current.filter((name) => name !== field));
   }
@@ -151,21 +151,20 @@ export default function OnboardingForm({
         ? (["firstName", "lastName", "location"] as const).filter(
             (field) => !values[field].trim(),
           )
-        : [
-            ...(["skills", "passions"] as const).filter(
-              (field) => !values[field].trim(),
-            ),
+        : step === 2 ? [
+            ...(["passions"] as const).filter((field) => !values[field].trim()),
             ...(values.heartProject === null ? ["heartProject"] : []),
             ...(values.heartProject === true && !values.heartProjectDescription.trim()
               ? ["heartProjectDescription"]
               : []),
-          ];
+          ] : values.resources.length === 0
+              ? ["resources"] : [];
     setInvalid(missing);
     if (missing.length > 0) {
       requestAnimationFrame(() => formRef.current?.reportValidity());
       return;
     }
-    setStep((current) => Math.min(3, current + 1) as 1 | 2 | 3);
+    setStep((current) => Math.min(4, current + 1) as 1 | 2 | 3 | 4);
   }
 
   async function finalize() {
@@ -198,8 +197,9 @@ export default function OnboardingForm({
       first_name: values.firstName,
       last_name: values.lastName,
       location: values.location,
-      skills: values.skills,
       passions: values.passions,
+      free_resources: values.resources.filter((resource) => resource.classification === "free").map((resource) => resource.description).join("\n"),
+      paid_resources: values.resources.filter((resource) => resource.classification === "paid").map((resource) => resource.description).join("\n"),
       heart_project_seeking: values.heartProject === false ? "true" : "false",
       heart_project_description: values.heartProjectDescription,
       phone: values.phone,
@@ -227,17 +227,17 @@ export default function OnboardingForm({
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
       <div>
         <h1 className="text-2xl font-semibold">Intră în rețea</h1>
-        <p className="mt-2 text-sm text-zinc-600">
+        <p className="mt-2 text-sm text-zinc-300">
           Spune-ne despre tine, ca membrii să te poată găsi.
         </p>
       </div>
 
       <div aria-label="Progres înregistrare" className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
-          Pasul {step}/3
+          Pasul {step}/4
         </p>
-        <div className="grid grid-cols-3 gap-2" aria-hidden="true">
-          {[1, 2, 3].map((segment) => (
+        <div className="grid grid-cols-4 gap-2" aria-hidden="true">
+          {[1, 2, 3, 4].map((segment) => (
             <span
               key={segment}
               data-testid="progress-segment"
@@ -252,8 +252,8 @@ export default function OnboardingForm({
           {step === 1
             ? "Despre tine"
             : step === 2
-              ? "Abilități, pasiuni și Proiect de Suflet"
-              : "Contact"}
+              ? "Pasiuni și Proiect de Suflet"
+              : step === 3 ? "Ce resurse poți oferi comunității?" : "Contact"}
         </h2>
 
         {step === 1 ? <><div className="grid gap-4 sm:grid-cols-2">
@@ -307,21 +307,6 @@ export default function OnboardingForm({
 
         {step === 2 ? (
           <>
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="skills" className="text-sm font-medium">
-                Abilități (obligatoriu)
-              </label>
-              <textarea
-                id="skills"
-                required
-                rows={3}
-                value={values.skills}
-                onChange={(event) => update("skills", event.target.value)}
-                aria-invalid={invalid.includes("skills")}
-                className={fieldClass(invalid.includes("skills"))}
-                placeholder="Cu ce îi poți ajuta pe ceilalți?"
-              />
-            </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="passions" className="text-sm font-medium">
                 Pasiuni (obligatoriu)
@@ -387,7 +372,22 @@ export default function OnboardingForm({
 
         {step === 3 ? (
           <>
-            <p className="text-sm leading-6 text-zinc-600">
+            <p className="text-sm leading-6 text-zinc-300">O resursă poate fi un lucru material sau un serviciu pe care îl pui la dispoziția celorlalți. Adaugă cel puțin o resursă și separă ce oferi gratis de ce oferi contra cost.</p>
+            <p className="text-sm font-medium text-white">Adaugă fiecare resursă separat.</p>
+            <ResourceEditor resources={values.resources} onChange={(resources) => {
+              setValues((current) => ({ ...current, resources }));
+              setInvalid((current) => current.filter((name) => name !== "resources"));
+            }} />
+            <label className="flex items-center gap-3 rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300">
+              <input type="checkbox" checked={values.resources.length > 0} readOnly tabIndex={-1} className="size-4 accent-zinc-100" />
+              Adaugă cel puțin o resursă, gratis sau contra cost.
+            </label>
+          </>
+        ) : null}
+
+        {step === 4 ? (
+          <>
+            <p className="text-sm leading-6 text-zinc-300">
               Telefonul și emailul de contact sunt obligatorii și vor fi vizibile membrilor
               rețelei. Celelalte câmpuri sunt opționale.
             </p>
@@ -464,18 +464,19 @@ export default function OnboardingForm({
               type="button"
               onClick={() => {
                 setInvalid([]);
-                setStep((current) => Math.max(1, current - 1) as 1 | 2 | 3);
+                setStep((current) => Math.max(1, current - 1) as 1 | 2 | 3 | 4);
               }}
-              className="flex-1 rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:border-zinc-500"
+              className="flex-1 rounded-lg border border-zinc-600 px-4 py-2.5 text-sm font-semibold text-white hover:border-zinc-400"
             >
               Înapoi
             </button>
           ) : null}
-          {step < 3 ? (
+          {step < 4 ? (
             <button
               type="button"
+              disabled={step === 3 && values.resources.length === 0}
               onClick={next}
-              className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
+              className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Înainte
             </button>

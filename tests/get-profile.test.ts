@@ -19,7 +19,10 @@ describe("getProfile (S1 integration seam)", () => {
       firstName: "Maria",
       lastName: "Pop",
       location: "Cluj-Napoca",
-      skills: "carpentry, masonry",
+      resources: [
+        { description: "Atelier de tâmplărie", classification: "free" },
+        { description: "Mobilă la comandă", classification: "paid" },
+      ],
       passions: "timber framing",
       heartProjectDescription: "A communal workshop",
       heartProjectSeeking: false,
@@ -34,11 +37,13 @@ describe("getProfile (S1 integration seam)", () => {
       id,
       name: "Maria Pop",
       location: "Cluj-Napoca",
-      skills: "carpentry, masonry",
       passions: "timber framing",
       heartProjectDescription: "A communal workshop",
       heartProjectSeeking: false,
     });
+    expect(profile?.resources.map((resource) => resource.description)).toEqual([
+      "Atelier de tâmplărie", "Mobilă la comandă",
+    ]);
     // Published links present; unpublished ones absent, not null.
     expect(profile?.socials).toEqual({
       website: "https://maria.example.com",

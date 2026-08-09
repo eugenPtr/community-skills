@@ -55,4 +55,24 @@ describe("listMembers (S1 integration seam)", () => {
     expect(byName["Devoted Two"].heartProjectSeeking).toBe(false);
     expect(byName["Devoted Two"].heartProjectDescription).toBe("Restoring a watermill");
   });
+
+  it("returns at most two Resources in free-first persisted order with an accurate total", async () => {
+    await seedMember(db, {
+      firstName: "Resource",
+      lastName: "Owner",
+      resources: [
+        { description: "Paid second", classification: "paid" },
+        { description: "Free first", classification: "free" },
+        { description: "Free second", classification: "free" },
+      ],
+    });
+
+    const [member] = await listMembers(pgliteListMembersAdapter(db));
+
+    expect(member.resources.map((resource) => resource.description)).toEqual([
+      "Free first",
+      "Free second",
+    ]);
+    expect(member.resourceCount).toBe(3);
+  });
 });

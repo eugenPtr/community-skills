@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Resource } from "@/lib/resources/model";
 
 // The Social Links a Profile can publish, in display order. The same order the
 // Profile page renders them in; a link absent from the map was never published
@@ -18,19 +19,18 @@ export interface MemberProfile {
   id: string;
   name: string;
   location: string;
-  skills: string;
   passions: string;
   heartProjectDescription: string | null;
   heartProjectSeeking: boolean;
   // Only the Social Links the Member actually set. Absent key = not published.
   socials: Partial<Record<SocialKey, string>>;
+  resources: Resource[];
 }
 
 interface ProfileRow {
   id: string;
   name: string;
   location: string;
-  skills: string;
   passions: string;
   heartProjectDescription: string | null;
   heartProjectSeeking: boolean;
@@ -43,6 +43,10 @@ export interface GetProfileClient {
   }>;
   fetchSocials(memberId: string): PromiseLike<{
     data: Record<SocialKey, string | null> | null;
+    error: { message: string } | null;
+  }>;
+  fetchResources(memberId: string): PromiseLike<{
+    data: Resource[] | null;
     error: { message: string } | null;
   }>;
 }
@@ -63,6 +67,8 @@ export async function getProfile(
   if (socialsError) {
     throw new Error(`getProfile socials failed: ${socialsError.message}`);
   }
+  const { data: resources, error: resourcesError } = await client.fetchResources(memberId);
+  if (resourcesError) throw new Error(`getProfile resources failed: ${resourcesError.message}`);
 
   const socials: Partial<Record<SocialKey, string>> = {};
   if (socialsRow) {
@@ -72,7 +78,7 @@ export async function getProfile(
     }
   }
 
-  return { ...profile, socials };
+  return { ...profile, socials, resources: resources ?? [] };
 }
 
 // Production adapter over the cookie-bound server client (ADR-0006 RLS).
@@ -84,7 +90,7 @@ export function supabaseGetProfileClient(
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "member_id, first_name, last_name, location, skills, passions, heart_project_description, heart_project_seeking",
+          "member_id, first_name, last_name, location, passions, heart_project_description, heart_project_seeking",
         )
         .eq("member_id", memberId)
         .maybeSingle();
@@ -94,7 +100,6 @@ export function supabaseGetProfileClient(
               id: data.member_id,
               name: `${data.first_name} ${data.last_name}`,
               location: data.location,
-              skills: data.skills,
               passions: data.passions,
               heartProjectDescription: data.heart_project_description,
               heartProjectSeeking: data.heart_project_seeking,
@@ -113,6 +118,14 @@ export function supabaseGetProfileClient(
         data: data ?? null,
         error: error ? { message: error.message } : null,
       };
+    },
+    async fetchResources(memberId) {
+      const { data, error } = await supabase.from("resources")
+        .select("id, description, classification, position")
+        .eq("member_id", memberId)
+        .order("classification", { ascending: true })
+        .order("position", { ascending: true });
+      return { data: data as Resource[] | null, error: error ? { message: error.message } : null };
     },
   };
 }

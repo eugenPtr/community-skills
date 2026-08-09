@@ -8,7 +8,7 @@ import type { ListMembersClient } from "@/lib/members/list";
 import type { GetProfileClient, SocialKey } from "@/lib/profile/get";
 import type { ListInvitesClient } from "@/lib/invites/list";
 import type { GenerateInviteClient } from "@/lib/invites/generate";
-import type { EmbedMemberDbClient } from "@/lib/people-search/embed-member";
+import type { EmbedResourceDbClient } from "@/lib/people-search/embed-member";
 import type { SearchMembersDbClient } from "@/lib/people-search/search-members";
 import type { ConversationsDbClient } from "@/lib/people-search/conversations";
 
@@ -50,10 +50,32 @@ const STUB_AUTH_SCHEMA = `
 // The production migrations (20260617120000_profiles_embedding.sql and
 // 20260617120100_match_members.sql) remain pure pgvector.
 const VECTOR_SHIM = `
+  create type resource_classification as enum ('free', 'paid');
+  create table resources (
+    id uuid primary key default gen_random_uuid(),
+    member_id uuid not null references members(id) on delete cascade,
+    description text not null check (description = btrim(description) and char_length(description) between 1 and 255 and description !~ E'[\\n\\r]'),
+    classification resource_classification not null,
+    position smallint not null check (position >= 0),
+    embedding double precision[] not null,
+    embedding_input text not null,
+    embedded_at timestamptz not null default now(),
+    unique (member_id, classification, position)
+  );
+  create unique index resources_description_unique on resources(member_id, lower(description));
+  create function enforce_resource_category_limit() returns trigger language plpgsql as $$
+  begin
+    if (select count(*) from resources where member_id=new.member_id and classification=new.classification) >= 10 then
+      raise exception 'resource_category_limit' using errcode='23514';
+    end if;
+    return new;
+  end $$;
+  create trigger resources_category_limit before insert on resources for each row execute function enforce_resource_category_limit();
+  alter table profiles drop column skills;
   alter table profiles
-    add column embedding double precision[],
-    add column embedding_input text,
-    add column embedded_at timestamptz;
+    add column profile_context_embedding double precision[],
+    add column profile_context_embedding_input text,
+    add column profile_context_embedded_at timestamptz;
 
   create or replace function cosine_similarity(a double precision[], b double precision[])
   returns double precision language sql immutable as $$
@@ -62,7 +84,7 @@ const VECTOR_SHIM = `
             * sqrt((select sum(y * y) from unnest(b) as y)));
   $$;
 
-  create or replace function match_members(
+  create or replace function match_resources(
     query_embedding double precision[],
     match_count int,
     min_similarity float
@@ -71,22 +93,34 @@ const VECTOR_SHIM = `
     member_id uuid,
     first_name text,
     last_name text,
-    skills text,
-    passions text,
-    heart_project_description text,
-    heart_project_seeking boolean,
+    resource_id uuid,
+    description text,
+    classification resource_classification,
     similarity float
   )
   language sql stable as $$
     select
-      p.member_id, p.first_name, p.last_name, p.skills, p.passions,
-      p.heart_project_description, p.heart_project_seeking,
-      cosine_similarity(p.embedding, query_embedding) as similarity
-    from profiles p
-    where p.embedding is not null
-      and cosine_similarity(p.embedding, query_embedding) >= min_similarity
+      p.member_id, p.first_name, p.last_name, r.id, r.description, r.classification,
+      cosine_similarity(r.embedding, query_embedding) as similarity
+    from resources r join profiles p on p.member_id = r.member_id
+    where cosine_similarity(r.embedding, query_embedding) >= min_similarity
     order by similarity desc
     limit match_count;
+  $$;
+
+  create or replace function match_profile_contexts(
+    query_embedding double precision[], match_count int, min_similarity float
+  ) returns table (
+    member_id uuid, first_name text, last_name text, passions text,
+    heart_project_description text, heart_project_seeking boolean, similarity float
+  ) language sql stable as $$
+    select p.member_id, p.first_name, p.last_name, p.passions,
+      p.heart_project_description, p.heart_project_seeking,
+      cosine_similarity(p.profile_context_embedding, query_embedding) as similarity
+    from profiles p
+    where p.profile_context_embedding is not null
+      and cosine_similarity(p.profile_context_embedding, query_embedding) >= min_similarity
+    order by similarity desc limit match_count;
   $$;
 `;
 
@@ -173,73 +207,37 @@ export function pgliteValidateAdapter(db: PGlite): InviteValidateClient {
 
 export function pgliteOnboardingAdapter(db: PGlite): OnboardingDbClient {
   return {
-    async rpc(name, args) {
+    async completeOnboarding(data) {
       try {
-        const result = await db.query<{ claim_invite: string }>(
-          `select claim_invite($1, $2, $3) as claim_invite`,
-          [args.p_user_id, args.p_email, args.p_code],
+        await db.exec("begin");
+        await db.query(`select claim_invite($1, $2, $3)`, [data.userId, data.email, data.code]);
+        await db.query(
+          `insert into profiles (member_id, first_name, last_name, location, passions, heart_project_description, heart_project_seeking,
+             profile_context_embedding, profile_context_embedding_input, profile_context_embedded_at)
+           values ($1,$2,$3,$4,$5,$6,$7,$8,$9,now())`,
+          [data.userId, data.firstName, data.lastName, data.location, data.passions,
+            data.heartProjectDescription ?? null, data.heartProjectSeeking,
+            data.profileContextEmbedding, data.profileContextEmbeddingInput],
         );
-        return { data: result.rows[0].claim_invite, error: null };
+        await db.query(
+          `insert into socials (member_id, phone, email, website, linkedin, facebook, instagram, x)
+           values ($1,$2,$3,$4,$5,$6,$7,$8)`,
+          [data.userId, data.socials.phone, data.socials.email, data.socials.website,
+            data.socials.linkedin, data.socials.facebook, data.socials.instagram, data.socials.x],
+        );
+        for (const resource of data.resources) {
+          await db.query(
+            `insert into resources (member_id, description, classification, position, embedding, embedding_input)
+             values ($1,$2,$3,$4,$5,$2)`,
+            [data.userId, resource.description, resource.classification, resource.position, resource.embedding],
+          );
+        }
+        await db.exec("commit");
+        return { error: null };
       } catch (err) {
+        await db.exec("rollback").catch(() => undefined);
         const e = err as { code?: string; message?: string };
-        return {
-          data: null,
-          error: { code: e.code, message: e.message ?? String(err) },
-        };
-      }
-    },
-    async insertProfile(data) {
-      try {
-        await db.query(
-          `insert into profiles
-             (member_id, first_name, last_name, location, skills, passions, heart_project_description, heart_project_seeking)
-           values ($1, $2, $3, $4, $5, $6, $7, $8)`,
-          [
-            data.memberId,
-            data.firstName,
-            data.lastName,
-            data.location,
-            data.skills,
-            data.passions,
-            data.heartProjectDescription,
-            data.heartProjectSeeking,
-          ],
-        );
-        return { error: null };
-      } catch (err) {
-        const e = err as { message?: string };
-        return { error: { message: e.message ?? String(err) } };
-      }
-    },
-    async upsertSocials(data) {
-      try {
-        await db.query(
-          `insert into socials
-             (member_id, phone, email, website, linkedin, facebook, instagram, x)
-           values ($1, $2, $3, $4, $5, $6, $7, $8)
-           on conflict (member_id) do update set
-             phone = excluded.phone,
-             email = excluded.email,
-             website = excluded.website,
-             linkedin = excluded.linkedin,
-             facebook = excluded.facebook,
-             instagram = excluded.instagram,
-             x = excluded.x`,
-          [
-            data.memberId,
-            data.phone,
-            data.email,
-            data.website,
-            data.linkedin,
-            data.facebook,
-            data.instagram,
-            data.x,
-          ],
-        );
-        return { error: null };
-      } catch (err) {
-        const e = err as { message?: string };
-        return { error: { message: e.message ?? String(err) } };
+        return { error: { code: e.code, message: e.message ?? String(err) } };
       }
     },
   };
@@ -252,21 +250,44 @@ export function pgliteListMembersAdapter(db: PGlite): ListMembersClient {
         member_id: string;
         first_name: string;
         last_name: string;
-        skills: string;
         heart_project_description: string | null;
         heart_project_seeking: boolean;
+        resource_description: string | null;
+        resource_classification: "free" | "paid" | null;
+        resource_position: number | null;
       }>(
-        `select member_id, first_name, last_name, skills, heart_project_description, heart_project_seeking
-           from profiles`,
+        `select p.member_id, p.first_name, p.last_name, p.heart_project_description,
+                p.heart_project_seeking, r.description as resource_description,
+                r.classification as resource_classification, r.position as resource_position
+           from profiles p
+           left join resources r on r.member_id = p.member_id`,
       );
-      return {
-        data: result.rows.map((r) => ({
+      const members = new Map<string, {
+        id: string;
+        name: string;
+        heartProjectDescription: string | null;
+        heartProjectSeeking: boolean;
+        resources: Array<{ description: string; classification: "free" | "paid"; position: number }>;
+      }>();
+      for (const r of result.rows) {
+        const member = members.get(r.member_id) ?? {
           id: r.member_id,
           name: `${r.first_name} ${r.last_name}`,
-          skills: r.skills,
           heartProjectDescription: r.heart_project_description,
           heartProjectSeeking: r.heart_project_seeking,
-        })),
+          resources: [],
+        };
+        if (r.resource_description && r.resource_classification !== null && r.resource_position !== null) {
+          member.resources.push({
+            description: r.resource_description,
+            classification: r.resource_classification,
+            position: r.resource_position,
+          });
+        }
+        members.set(r.member_id, member);
+      }
+      return {
+        data: [...members.values()],
         error: null,
       };
     },
@@ -281,12 +302,11 @@ export function pgliteGetProfileAdapter(db: PGlite): GetProfileClient {
         first_name: string;
         last_name: string;
         location: string;
-        skills: string;
         passions: string;
         heart_project_description: string | null;
         heart_project_seeking: boolean;
       }>(
-        `select member_id, first_name, last_name, location, skills, passions,
+        `select member_id, first_name, last_name, location, passions,
                 heart_project_description, heart_project_seeking
            from profiles where member_id = $1`,
         [memberId],
@@ -298,7 +318,6 @@ export function pgliteGetProfileAdapter(db: PGlite): GetProfileClient {
               id: row.member_id,
               name: `${row.first_name} ${row.last_name}`,
               location: row.location,
-              skills: row.skills,
               passions: row.passions,
               heartProjectDescription: row.heart_project_description,
               heartProjectSeeking: row.heart_project_seeking,
@@ -315,6 +334,13 @@ export function pgliteGetProfileAdapter(db: PGlite): GetProfileClient {
       );
       return { data: result.rows[0] ?? null, error: null };
     },
+    async fetchResources(memberId) {
+      const result = await db.query<{ id: string; description: string; classification: "free" | "paid"; position: number }>(
+        `select id, description, classification, position from resources where member_id = $1
+         order by classification, position`, [memberId],
+      );
+      return { data: result.rows, error: null };
+    },
   };
 }
 
@@ -329,6 +355,7 @@ export async function seedMember(
     email?: string;
     role?: "member" | "admin";
     location?: string;
+    resources?: Array<{ description: string; classification: "free" | "paid"; embedding?: number[] }>;
     skills?: string;
     passions?: string;
     heartProjectDescription?: string | null;
@@ -337,6 +364,7 @@ export async function seedMember(
     // Pre-set the People Search embedding (the shim's double precision[]), so a
     // search test starts from members that are already findable.
     embedding?: number[];
+    profileContextEmbedding?: number[];
   },
 ): Promise<string> {
   const id = crypto.randomUUID();
@@ -352,20 +380,29 @@ export async function seedMember(
   ]);
   await db.query(
     `insert into profiles
-       (member_id, first_name, last_name, location, skills, passions, heart_project_description, heart_project_seeking, embedding)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+       (member_id, first_name, last_name, location, passions, heart_project_description, heart_project_seeking,
+        profile_context_embedding, profile_context_embedding_input, profile_context_embedded_at)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, now())`,
     [
       id,
       opts.firstName,
       opts.lastName,
       opts.location ?? "Bucharest",
-      opts.skills ?? "skills",
       opts.passions ?? "passions",
       opts.heartProjectDescription ?? null,
       opts.heartProjectSeeking ?? false,
-      opts.embedding ?? null,
+      opts.profileContextEmbedding ?? opts.embedding ?? [0, 0, 1],
+      `Pasiuni: ${opts.passions ?? "passions"}`,
     ],
   );
+  const resources = opts.resources ?? [{ description: opts.skills ?? "Community resource", classification: "free" as const, embedding: opts.embedding }];
+  for (const [position, resource] of resources.entries()) {
+    await db.query(
+      `insert into resources (member_id, description, classification, position, embedding, embedding_input)
+       values ($1,$2,$3,$4,$5,$2)`,
+      [id, resource.description, resource.classification, position, resource.embedding ?? [0, 0, 1]],
+    );
+  }
   if (opts.socials) {
     const keys: SocialKey[] = [
       "phone",
@@ -427,38 +464,20 @@ export function pgliteListInvitesAdapter(db: PGlite): ListInvitesClient {
 // the onboarding/profile adapters above. embedMember and searchMembers read/write
 // the shimmed `embedding` (double precision[]) and the shimmed match_members.
 
-export function pgliteEmbedMemberAdapter(db: PGlite): EmbedMemberDbClient {
+export function pgliteEmbedResourceAdapter(db: PGlite): EmbedResourceDbClient {
   return {
-    async getEmbeddingProfile(memberId) {
-      const result = await db.query<{
-        skills: string;
-        passions: string;
-        heart_project_description: string | null;
-        heart_project_seeking: boolean;
-      }>(
-        `select skills, passions, heart_project_description, heart_project_seeking
-           from profiles where member_id = $1`,
-        [memberId],
+    async getResource(id) {
+      const result = await db.query<{ description: string }>(
+        `select description from resources where id = $1`, [id],
       );
-      const row = result.rows[0];
-      return {
-        data: row
-          ? {
-              skills: row.skills,
-              passions: row.passions,
-              heartProjectDescription: row.heart_project_description,
-              heartProjectSeeking: row.heart_project_seeking,
-            }
-          : null,
-        error: null,
-      };
+      return { data: result.rows[0] ?? null, error: null };
     },
-    async writeEmbedding({ memberId, embedding, embeddingInput }) {
+    async writeEmbedding({ id, embedding, embeddingInput }) {
       await db.query(
-        `update profiles
+        `update resources
             set embedding = $2, embedding_input = $3, embedded_at = now()
-          where member_id = $1`,
-        [memberId, embedding, embeddingInput],
+          where id = $1`,
+        [id, embedding, embeddingInput],
       );
       return { error: null };
     },
@@ -467,17 +486,16 @@ export function pgliteEmbedMemberAdapter(db: PGlite): EmbedMemberDbClient {
 
 export function pgliteSearchMembersAdapter(db: PGlite): SearchMembersDbClient {
   return {
-    async matchMembers({ queryEmbedding, matchCount, minSimilarity }) {
+    async matchResources({ queryEmbedding, matchCount, minSimilarity }) {
       const result = await db.query<{
         member_id: string;
         first_name: string;
         last_name: string;
-        skills: string;
-        passions: string;
-        heart_project_description: string | null;
-        heart_project_seeking: boolean;
+        resource_id: string;
+        description: string;
+        classification: "free" | "paid";
         similarity: number;
-      }>(`select * from match_members($1, $2, $3)`, [
+      }>(`select * from match_resources($1, $2, $3)`, [
         queryEmbedding,
         matchCount,
         minSimilarity,
@@ -487,14 +505,24 @@ export function pgliteSearchMembersAdapter(db: PGlite): SearchMembersDbClient {
           memberId: r.member_id,
           firstName: r.first_name,
           lastName: r.last_name,
-          skills: r.skills,
-          passions: r.passions,
-          heartProjectDescription: r.heart_project_description,
-          heartProjectSeeking: r.heart_project_seeking,
+          resourceId: r.resource_id,
+          description: r.description,
+          classification: r.classification,
           similarity: r.similarity,
         })),
         error: null,
       };
+    },
+    async matchProfileContexts({ queryEmbedding, matchCount, minSimilarity }) {
+      const result = await db.query<{
+        member_id: string; first_name: string; last_name: string; passions: string;
+        heart_project_description: string | null; heart_project_seeking: boolean; similarity: number;
+      }>(`select * from match_profile_contexts($1, $2, $3)`, [queryEmbedding, matchCount, minSimilarity]);
+      return { data: result.rows.map((r) => ({
+        memberId: r.member_id, firstName: r.first_name, lastName: r.last_name,
+        passions: r.passions, heartProjectDescription: r.heart_project_description,
+        heartProjectSeeking: r.heart_project_seeking, similarity: r.similarity,
+      })), error: null };
     },
   };
 }
