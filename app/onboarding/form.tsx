@@ -16,6 +16,7 @@ type OnboardingFormProps = {
   invite: string;
   memberId: string;
   loginEmail: string;
+  testMode?: boolean;
 };
 
 const fieldClass = (invalid: boolean) =>
@@ -39,7 +40,12 @@ function phonePlaceholder(country?: Country) {
 
 const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
-export default function OnboardingForm({ invite, memberId, loginEmail }: OnboardingFormProps) {
+export default function OnboardingForm({
+  invite,
+  memberId,
+  loginEmail,
+  testMode = false,
+}: OnboardingFormProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const draftKey = `onboarding-draft:${memberId}:${invite}`;
@@ -178,6 +184,11 @@ export default function OnboardingForm({ invite, memberId, loginEmail }: Onboard
         toast.error("Adresa de email are un format invalid");
       }
       requestAnimationFrame(() => formRef.current?.reportValidity());
+      return;
+    }
+    if (testMode) {
+      localStorage.removeItem(draftKey);
+      toast.success("Fluxul de test a fost finalizat. Nicio informație nu a fost salvată.");
       return;
     }
     setSubmitting(true);

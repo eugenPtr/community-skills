@@ -35,6 +35,10 @@ Stack is Supabase + Vercel (ADR-0003). Every change to these must go through the
 
 - All transient feedback to the user — errors and confirmations alike — is shown as a **toast** (`sonner`), not inline `<p>` markup. `<Toaster />` is mounted once in `app/layout.tsx`; server actions pass feedback via a redirect query param (`?error=` / `?sent=`) that a client component reads, surfaces as a toast, then strips from the URL. Default duration 5s.
 
+# UI verification
+
+- Any change that affects the rendered UI or user interactions must be tested manually in a browser before handoff. Exercise the affected flow at desktop and mobile viewport sizes, verify relevant interactive and validation states, and report what was checked.
+
 # Navigation
 
 - Back affordances use the reusable `<BackButton>` component (history-aware: `router.back()` when in-app history exists, else navigates to `fallbackHref`). Don't hand-roll `router.back()` per page.

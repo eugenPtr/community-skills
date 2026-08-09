@@ -6,10 +6,11 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import OnboardingForm from "@/app/onboarding/form";
 
-const { mockSubmit, mockReplace, mockToastError } = vi.hoisted(() => ({
+const { mockSubmit, mockReplace, mockToastError, mockToastSuccess } = vi.hoisted(() => ({
   mockSubmit: vi.fn(),
   mockReplace: vi.fn(),
   mockToastError: vi.fn(),
+  mockToastSuccess: vi.fn(),
 }));
 
 vi.mock("@/app/onboarding/actions", () => ({
@@ -21,7 +22,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("sonner", () => ({
-  toast: { error: mockToastError },
+  toast: { error: mockToastError, success: mockToastSuccess },
 }));
 
 describe("OnboardingForm (Member-facing form seam)", () => {
@@ -30,6 +31,7 @@ describe("OnboardingForm (Member-facing form seam)", () => {
     mockSubmit.mockReset();
     mockReplace.mockReset();
     mockToastError.mockReset();
+    mockToastSuccess.mockReset();
   });
   afterEach(cleanup);
 
@@ -243,6 +245,28 @@ describe("OnboardingForm (Member-facing form seam)", () => {
     );
     expect(screen.getByText("Pasul 1/3")).toBeInTheDocument();
     expect(screen.getByLabelText("Prenume (obligatoriu)")).toHaveValue("");
+  });
+
+  it("completes test mode without submitting data or navigating", async () => {
+    const user = userEvent.setup();
+    render(
+      <OnboardingForm
+        invite="test-only"
+        memberId="test-onboarding-member"
+        loginEmail="test@example.com"
+        testMode
+      />,
+    );
+    await reachContactStep(user);
+    await user.type(screen.getByLabelText("Telefon (obligatoriu)"), "721234567");
+    await user.click(screen.getByRole("button", { name: "Finalizează înregistrarea" }));
+
+    expect(mockSubmit).not.toHaveBeenCalled();
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockToastSuccess).toHaveBeenCalledWith(
+      "Fluxul de test a fost finalizat. Nicio informație nu a fost salvată.",
+    );
+    expect(localStorage.getItem("onboarding-draft:test-onboarding-member:test-only")).toBeNull();
   });
 
   it("restores a Member-and-Invite-scoped draft and its last valid step after refresh", async () => {
