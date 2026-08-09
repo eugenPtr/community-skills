@@ -118,37 +118,27 @@ function SortableResourceRow({
   editing,
   editValue,
   editError,
-  menuOpen,
   onBeginEdit,
   onEditValue,
   onCommitEdit,
   onCancelEdit,
   onRemove,
-  onToggleMenu,
-  onMove,
-  onReorder,
 }: {
   resource: EditableResource;
   section: (typeof SECTIONS)[ResourceClassification];
   editing: boolean;
   editValue: string;
   editError: boolean;
-  menuOpen: boolean;
   onBeginEdit: () => void;
   onEditValue: (value: string) => void;
   onCommitEdit: () => void;
   onCancelEdit: () => void;
   onRemove: () => void;
-  onToggleMenu: () => void;
-  onMove: () => void;
-  onReorder: (offset: -1 | 1) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: resource.id,
     data: { classification: resource.classification },
   });
-  const target = resource.classification === "free" ? "paid" : "free";
-  const targetLabel = target === "free" ? "Mută la gratis" : "Mută la contra cost";
 
   function handleKeyDown(
     event: KeyboardEvent<HTMLTextAreaElement>,
@@ -208,33 +198,14 @@ function SortableResourceRow({
         )}
       </div>
 
-      <div className="relative shrink-0">
-        <button
-          type="button"
-          aria-label={`Acțiuni pentru ${resource.description}`}
-          aria-expanded={menuOpen}
-          onClick={onToggleMenu}
-          className="grid size-8 place-items-center rounded-md text-lg leading-none text-zinc-300 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-        >
-          ⋯
-        </button>
-        {menuOpen && (
-          <div className="absolute right-0 top-9 z-20 w-48 rounded-lg border border-zinc-600 bg-zinc-900 p-1 shadow-xl">
-            <button type="button" onClick={() => onReorder(-1)} className="w-full rounded px-3 py-2 text-left text-sm text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-              Mută mai sus
-            </button>
-            <button type="button" onClick={() => onReorder(1)} className="w-full rounded px-3 py-2 text-left text-sm text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-              Mută mai jos
-            </button>
-            <button type="button" onClick={onMove} className="w-full rounded px-3 py-2 text-left text-sm text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-              {targetLabel}
-            </button>
-            <button type="button" onClick={onRemove} className="w-full rounded px-3 py-2 text-left text-sm text-red-300 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-              Elimină
-            </button>
-          </div>
-        )}
-      </div>
+      <button
+        type="button"
+        aria-label={`Elimină ${resource.description}`}
+        onClick={onRemove}
+        className="grid size-8 shrink-0 place-items-center rounded-md text-xl leading-none text-zinc-300 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+      >
+        <span aria-hidden>×</span>
+      </button>
     </div>
   );
 }
@@ -242,16 +213,17 @@ function SortableResourceRow({
 export function ResourceEditor({
   resources,
   onChange,
+  showExamples = true,
 }: {
   resources: EditableResource[];
   onChange: (resources: EditableResource[]) => void;
+  showExamples?: boolean;
 }) {
   const [adding, setAdding] = useState<ResourceClassification | null>(null);
   const [drafts, setDrafts] = useState<DraftState>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [errorFor, setErrorFor] = useState<string | null>(null);
-  const [menuFor, setMenuFor] = useState<string | null>(null);
   const dragStartResources = useRef<EditableResource[] | null>(null);
   const idPrefix = useId();
   const dndContextId = useId();
@@ -299,7 +271,6 @@ export function ResourceEditor({
     const classificationRows = resources.filter((item) => item.classification === resource.classification);
     const position = classificationRows.findIndex((item) => item.id === resource.id);
     onChange(resources.filter((item) => item.id !== resource.id));
-    setMenuFor(null);
     toast("Resursa a fost eliminată.", {
       duration: 5000,
       action: {
@@ -348,7 +319,6 @@ export function ResourceEditor({
 
   function handleDragStart() {
     dragStartResources.current = resourcesRef.current;
-    setMenuFor(null);
   }
 
   function handleDragOver({ active, over }: DragOverEvent) {
@@ -407,7 +377,9 @@ export function ResourceEditor({
               <div className="mb-2 flex items-end justify-between gap-3">
                 <div>
                   <h3 id={`resources-${classification}`} className="text-sm font-semibold text-white">{section.title}</h3>
-                  <p className="mt-1 text-xs leading-5 text-zinc-400">{section.example}</p>
+                  {showExamples ? (
+                    <p className="mt-1 text-xs leading-5 text-zinc-400">{section.example}</p>
+                  ) : null}
                 </div>
                 <span className="shrink-0 font-mono text-xs text-zinc-500">{rows.length}/10</span>
               </div>
@@ -421,24 +393,11 @@ export function ResourceEditor({
                       editing={editingId === resource.id}
                       editValue={editValue}
                       editError={errorFor === `edit-${resource.id}`}
-                      menuOpen={menuFor === resource.id}
-                      onBeginEdit={() => { setEditingId(resource.id); setEditValue(resource.description); setErrorFor(null); setMenuFor(null); }}
+                      onBeginEdit={() => { setEditingId(resource.id); setEditValue(resource.description); setErrorFor(null); }}
                       onEditValue={(value) => { setEditValue(value); setErrorFor(null); }}
                       onCommitEdit={() => commitEdit(resource.id)}
                       onCancelEdit={() => { setEditingId(null); setErrorFor(null); }}
                       onRemove={() => remove(resource)}
-                      onToggleMenu={() => setMenuFor((current) => current === resource.id ? null : resource.id)}
-                      onMove={() => {
-                        const target = resource.classification === "free" ? "paid" : "free";
-                        if (moveResource(resource.id, target)) setMenuFor(null);
-                      }}
-                      onReorder={(offset) => {
-                        const rows = resourcesRef.current.filter((item) => item.classification === resource.classification);
-                        const index = rows.findIndex((item) => item.id === resource.id);
-                        const target = rows[index + offset];
-                        if (target) moveResource(resource.id, resource.classification, target.id);
-                        setMenuFor(null);
-                      }}
                     />
                   ))}
                 </ResourceContainer>
@@ -465,8 +424,8 @@ export function ResourceEditor({
                 </div>
               ) : (
                 <button type="button" disabled={atLimit} onClick={() => setAdding(classification)}
-                  className="mt-2 text-sm font-semibold text-white underline decoration-zinc-600 underline-offset-4 hover:decoration-white disabled:cursor-not-allowed disabled:text-zinc-500 disabled:no-underline">
-                  {atLimit ? "Limită atinsă · 10/10" : "Adaugă resursă"}
+                  className="mt-2 inline-flex items-center gap-2 rounded-lg border border-zinc-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:border-zinc-400 hover:bg-white/5 disabled:cursor-not-allowed disabled:border-zinc-800 disabled:text-zinc-500">
+                  {atLimit ? "Limită atinsă · 10/10" : <><span aria-hidden className="text-lg leading-none">+</span> Adaugă resursă</>}
                 </button>
               )}
             </section>

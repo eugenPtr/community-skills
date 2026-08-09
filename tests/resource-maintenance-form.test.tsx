@@ -31,8 +31,7 @@ describe("ResourceMaintenanceForm", () => {
   it("allows a temporarily empty draft but disables save and unchecks the checklist", async () => {
     const user = userEvent.setup();
     render(<ResourceMaintenanceForm initialResources={initial} />);
-    await user.click(screen.getByRole("button", { name: "Acțiuni pentru Mentorat" }));
-    await user.click(screen.getByRole("button", { name: "Elimină" }));
+    await user.click(screen.getByRole("button", { name: "Elimină Mentorat" }));
     expect(screen.getByRole("checkbox")).not.toBeChecked();
     expect(screen.getByRole("button", { name: "Salvează modificările" })).toBeDisabled();
   });

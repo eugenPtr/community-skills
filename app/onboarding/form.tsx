@@ -40,16 +40,18 @@ function phonePlaceholder(country?: Country) {
 }
 
 const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const primaryButtonClass =
+  "rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 disabled:cursor-not-allowed disabled:opacity-40";
 
 export default function OnboardingForm({
   invite,
   memberId,
-  loginEmail,
   testMode = false,
 }: OnboardingFormProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const draftKey = `onboarding-draft:${memberId}:${invite}`;
+  const [started, setStarted] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [values, setValues] = useState({
     firstName: "",
@@ -60,7 +62,7 @@ export default function OnboardingForm({
     heartProjectDescription: "",
     resources: [] as EditableResource[],
     phone: "",
-    contactEmail: loginEmail,
+    contactEmail: "",
     website: "",
     linkedin: "",
     facebook: "",
@@ -71,6 +73,23 @@ export default function OnboardingForm({
   const [submitting, setSubmitting] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [invalid, setInvalid] = useState<string[]>([]);
+
+  const stepComplete =
+    step === 1
+      ? [values.firstName, values.lastName, values.location].every((value) => value.trim())
+      : step === 2
+        ? Boolean(
+            values.passions.trim() &&
+              values.heartProject !== null &&
+              (values.heartProject === false || values.heartProjectDescription.trim()),
+          )
+        : step === 3
+          ? values.resources.length > 0
+          : Boolean(
+              values.phone &&
+                isPossiblePhoneNumber(values.phone) &&
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.contactEmail.trim()),
+            );
 
   useEffect(() => {
     let cancelled = false;
@@ -94,7 +113,7 @@ export default function OnboardingForm({
           ) {
             localStorage.removeItem(draftKey);
           } else {
-            setValues({ ...draft.values, contactEmail: draft.values.contactEmail || loginEmail });
+            setValues(draft.values);
             setPhoneCountry(draft.phoneCountry ?? "RO");
             const identityComplete = [
               draft.values.firstName,
@@ -124,7 +143,7 @@ export default function OnboardingForm({
     return () => {
       cancelled = true;
     };
-  }, [draftKey, loginEmail]);
+  }, [draftKey]);
 
   useEffect(() => {
     if (!draftLoaded) return;
@@ -223,27 +242,58 @@ export default function OnboardingForm({
     }
   }
 
-  return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-16">
-      <div>
-        <h1 className="text-2xl font-semibold">Intră în rețea</h1>
-        <p className="mt-2 text-sm text-zinc-300">
-          Spune-ne despre tine, ca membrii să te poată găsi.
-        </p>
-      </div>
+  if (!started) {
+    return (
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-start gap-6 px-6 py-8 md:justify-center md:py-16">
+        <div>
+          <h1 className="text-3xl font-semibold">Intră în rețea</h1>
+          <p className="mt-2 text-sm text-zinc-300">
+            Spune-ne despre tine, ca membrii să te poată găsi.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setStarted(true)}
+          className={`${primaryButtonClass} w-full`}
+        >
+          Începe
+        </button>
+      </main>
+    );
+  }
 
-      <div aria-label="Progres înregistrare" className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
-          Pasul {step}/4
-        </p>
-        <div className="grid grid-cols-4 gap-2" aria-hidden="true">
-          {[1, 2, 3, 4].map((segment) => (
-            <span
-              key={segment}
-              data-testid="progress-segment"
-              className={`h-1.5 rounded-full transition-colors ${segment <= step ? "bg-zinc-900" : "bg-zinc-200"}`}
-            />
-          ))}
+  return (
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-start gap-6 px-6 py-8 md:justify-center md:py-16">
+      <div className="space-y-2">
+        {step > 1 ? (
+          <button
+            type="button"
+            aria-label="Înapoi"
+            onClick={() => {
+              setInvalid([]);
+              setStep((current) => Math.max(1, current - 1) as 1 | 2 | 3 | 4);
+            }}
+            className="inline-flex items-center gap-1.5 justify-self-start rounded-md py-1 pr-2 text-sm font-medium text-zinc-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 fill-none stroke-current stroke-2">
+              <path d="M19 12H5m7 7-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Înapoi
+          </button>
+        ) : null}
+        <div aria-label="Progres înregistrare" className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
+            Pasul {step}/4
+          </p>
+          <div className="grid grid-cols-4 gap-2" aria-hidden="true">
+            {[1, 2, 3, 4].map((segment) => (
+              <span
+                key={segment}
+                data-testid="progress-segment"
+                className={`h-1.5 rounded-full transition-colors ${segment <= step ? "bg-zinc-200" : "bg-zinc-900"}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
@@ -299,7 +349,6 @@ export default function OnboardingForm({
             onChange={(event) => update("location", event.target.value)}
             aria-invalid={invalid.includes("location")}
             className={fieldClass(invalid.includes("location"))}
-            placeholder="Oraș, Țară"
           />
         </div>
 
@@ -319,17 +368,18 @@ export default function OnboardingForm({
                 onChange={(event) => update("passions", event.target.value)}
                 aria-invalid={invalid.includes("passions")}
                 className={fieldClass(invalid.includes("passions"))}
-                placeholder="Ce te aduce în starea de flow?"
+                placeholder="Ce activități te fac să te simți cel mai viu?"
               />
             </div>
-            <fieldset
-              className={`rounded-lg border p-3 ${invalid.includes("heartProject") ? "border-red-600" : "border-transparent"}`}
-              aria-invalid={invalid.includes("heartProject")}
+            <div
+              role="group"
+              aria-labelledby="heart-project-question"
+              className={`flex items-center gap-3 rounded-lg border p-0 ${invalid.includes("heartProject") ? "border-red-600" : "border-transparent"}`}
             >
-              <legend className="px-1 text-sm font-medium">
+              <p id="heart-project-question" className="min-w-0 flex-1 text-sm font-medium">
                 Ai un Proiect de Suflet? (obligatoriu)
-              </legend>
-              <div className="mt-1 flex gap-3">
+              </p>
+              <div className="flex shrink-0 gap-2">
                 {[true, false].map((choice) => (
                   <button
                     key={String(choice)}
@@ -339,17 +389,17 @@ export default function OnboardingForm({
                       setValues((current) => ({ ...current, heartProject: choice }));
                       setInvalid((current) => current.filter((name) => name !== "heartProject"));
                     }}
-                    className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                    className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                       values.heartProject === choice
-                        ? "border-zinc-900 bg-zinc-900 text-white"
-                        : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500"
+                        ? "border-white bg-white text-zinc-950"
+                        : "border-zinc-700 bg-zinc-950 text-white hover:border-zinc-500"
                     }`}
                   >
                     {choice ? "Da" : "Încă nu"}
                   </button>
                 ))}
               </div>
-            </fieldset>
+            </div>
             {values.heartProject === true ? (
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="heart_project_description" className="text-sm font-medium">
@@ -374,14 +424,10 @@ export default function OnboardingForm({
           <>
             <p className="text-sm leading-6 text-zinc-300">O resursă poate fi un lucru material sau un serviciu pe care îl pui la dispoziția celorlalți. Adaugă cel puțin o resursă și separă ce oferi gratis de ce oferi contra cost.</p>
             <p className="text-sm font-medium text-white">Adaugă fiecare resursă separat.</p>
-            <ResourceEditor resources={values.resources} onChange={(resources) => {
+            <ResourceEditor resources={values.resources} showExamples={false} onChange={(resources) => {
               setValues((current) => ({ ...current, resources }));
               setInvalid((current) => current.filter((name) => name !== "resources"));
             }} />
-            <label className="flex items-center gap-3 rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300">
-              <input type="checkbox" checked={values.resources.length > 0} readOnly tabIndex={-1} className="size-4 accent-zinc-100" />
-              Adaugă cel puțin o resursă, gratis sau contra cost.
-            </label>
           </>
         ) : null}
 
@@ -459,33 +505,21 @@ export default function OnboardingForm({
         ) : null}
 
         <div className="flex gap-3">
-          {step > 1 ? (
-            <button
-              type="button"
-              onClick={() => {
-                setInvalid([]);
-                setStep((current) => Math.max(1, current - 1) as 1 | 2 | 3 | 4);
-              }}
-              className="flex-1 rounded-lg border border-zinc-600 px-4 py-2.5 text-sm font-semibold text-white hover:border-zinc-400"
-            >
-              Înapoi
-            </button>
-          ) : null}
           {step < 4 ? (
             <button
               type="button"
-              disabled={step === 3 && values.resources.length === 0}
+              disabled={!stepComplete}
               onClick={next}
-              className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+              className={`${primaryButtonClass} flex-1`}
             >
               Înainte
             </button>
           ) : (
             <button
               type="button"
-              disabled={submitting}
+              disabled={submitting || !stepComplete}
               onClick={finalize}
-              className="flex-[2] rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:opacity-50"
+              className={`${primaryButtonClass} flex-[2]`}
             >
               {submitting ? "Se finalizează…" : "Finalizează înregistrarea"}
             </button>

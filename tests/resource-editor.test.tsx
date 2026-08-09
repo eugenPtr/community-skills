@@ -66,8 +66,7 @@ describe("ResourceEditor", () => {
       { id: "one", description: "Primul", classification: "free" },
       { id: "two", description: "Al doilea", classification: "free" },
     ]} />);
-    await user.click(screen.getByRole("button", { name: "Acțiuni pentru Primul" }));
-    await user.click(screen.getByRole("button", { name: "Elimină" }));
+    await user.click(screen.getByRole("button", { name: "Elimină Primul" }));
     expect(screen.queryByRole("button", { name: "Primul" })).not.toBeInTheDocument();
     const options = toast.mock.calls[0][1];
     expect(options.duration).toBe(5000);
@@ -89,56 +88,7 @@ describe("ResourceEditor", () => {
     ]} />);
     expect(screen.getByRole("button", { name: "Mută resursa Primul" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Primul" })).not.toHaveAttribute("aria-roledescription");
-    expect(screen.getByRole("button", { name: "Acțiuni pentru Primul" })).not.toHaveAttribute("aria-roledescription");
-  });
-
-  it("reorders within a category through the accessible action", async () => {
-    const user = userEvent.setup();
-    render(<Harness initial={[
-      { id: "one", description: "Primul", classification: "free" },
-      { id: "two", description: "Al doilea", classification: "free" },
-    ]} />);
-
-    await user.click(screen.getByRole("button", { name: "Acțiuni pentru Primul" }));
-    await user.click(screen.getByRole("button", { name: "Mută mai jos" }));
-
-    const text = screen.getByTestId("free-resource-list").textContent ?? "";
-    expect(text.indexOf("Al doilea")).toBeLessThan(text.indexOf("Primul"));
-  });
-
-  it("reclassifies through the accessible overflow action", async () => {
-    const user = userEvent.setup();
-    render(<Harness initial={[
-      { id: "one", description: "Mentorat", classification: "free" },
-      { id: "two", description: "Audit", classification: "paid" },
-    ]} />);
-
-    await user.click(screen.getByRole("button", { name: "Acțiuni pentru Mentorat" }));
-    await user.click(screen.getByRole("button", { name: "Mută la contra cost" }));
-
-    expect(screen.getByTestId("free-resource-list")).not.toHaveTextContent("Mentorat");
-    expect(screen.getByTestId("paid-resource-list").textContent).toMatch(/Audit.*Mentorat/);
-  });
-
-  it("rejects an accessible move into a full category and preserves both positions", async () => {
-    const user = userEvent.setup();
-    const paid = Array.from({ length: 10 }, (_, index) => ({
-      id: `paid-${index}`,
-      description: `Contra cost ${index}`,
-      classification: "paid" as const,
-    }));
-    render(<Harness initial={[
-      { id: "free-one", description: "Mentorat", classification: "free" },
-      ...paid,
-    ]} />);
-
-    await user.click(screen.getByRole("button", { name: "Acțiuni pentru Mentorat" }));
-    await user.click(screen.getByRole("button", { name: "Mută la contra cost" }));
-
-    expect(screen.getByTestId("free-resource-list")).toHaveTextContent("Mentorat");
-    const paidText = screen.getByTestId("paid-resource-list").textContent ?? "";
-    expect(paidText.indexOf("Contra cost 0")).toBeLessThan(paidText.indexOf("Contra cost 9"));
-    expect(paidText).not.toContain("Mentorat");
-    expect(toast.error).toHaveBeenCalledWith("Categoria contra cost poate conține cel mult 10 resurse.");
+    expect(screen.getByRole("button", { name: "Elimină Primul" })).not.toHaveAttribute("aria-roledescription");
+    expect(screen.queryByLabelText("Acțiuni pentru Primul")).not.toBeInTheDocument();
   });
 });
