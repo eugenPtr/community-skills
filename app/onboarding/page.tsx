@@ -39,5 +39,11 @@ export default async function OnboardingPage({
     );
   }
 
-  return <OnboardingForm invite={invite} />;
+  return (
+    <OnboardingForm
+      invite={invite}
+      memberId={user.id}
+      loginEmail={user.email ?? ""}
+    />
+  );
 }

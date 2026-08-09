@@ -102,5 +102,5 @@ export async function submitOnboardingAction(formData: FormData) {
     console.error("embedMember after onboarding failed:", e);
   }
 
-  redirect("/");
+  return { kind: "ok" } as const;
 }

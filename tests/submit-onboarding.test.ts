@@ -11,6 +11,10 @@ const BASE_PROFILE = {
   passions: "open-source software",
   heartProjectSeeking: false,
   heartProjectDescription: "Building a cooperative network",
+  socials: {
+    phone: "+40721234567",
+    email: "alice.contact@example.com",
+  },
 };
 
 describe("submitOnboarding (S1 integration seam)", () => {
@@ -65,7 +69,7 @@ describe("submitOnboarding (S1 integration seam)", () => {
     expect(invite.rows[0].claimed_by).toBe(seeded.userId);
   });
 
-  it("stores a socials row keyed by member when Social Links are provided", async () => {
+  it("stores Contact Details keyed by Member", async () => {
     const seeded = await seedUnclaimedInvite(db, {
       code: "DEV-CCCC-0004",
       email: "erin@example.com",
@@ -102,29 +106,40 @@ describe("submitOnboarding (S1 integration seam)", () => {
     expect(socials.rows[0].x).toBe("erin-x");
   });
 
-  it("creates no socials row when no Social Links are provided", async () => {
+  it("requires Direct Contact Details before claiming the Invite", async () => {
     const seeded = await seedUnclaimedInvite(db, {
       code: "DEV-CCCC-0005",
       email: "frank@example.com",
     });
 
-    const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
-      userId: seeded.userId,
-      email: seeded.email,
-      code: seeded.code,
-      ...BASE_PROFILE,
-    });
+    for (const socials of [
+      { phone: "", email: "frank@example.com" },
+      { phone: "+40721234567", email: "   " },
+    ]) {
+      const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+        userId: seeded.userId,
+        email: seeded.email,
+        code: seeded.code,
+        ...BASE_PROFILE,
+        socials,
+      });
 
-    expect(result).toEqual({ kind: "ok" });
+      expect(result).toEqual({ kind: "missingFields" });
+    }
 
-    const socials = await db.query(
-      `select member_id from socials where member_id = $1`,
-      [seeded.userId],
+    const members = await db.query(`select id from members where id = $1`, [
+      seeded.userId,
+    ]);
+    expect(members.rows).toHaveLength(0);
+
+    const invite = await db.query<{ claimed_by: string | null }>(
+      `select claimed_by from invites where code = $1`,
+      [seeded.code],
     );
-    expect(socials.rows).toHaveLength(0);
+    expect(invite.rows[0].claimed_by).toBeNull();
   });
 
-  it("stores only provided Social Links and leaves the rest null", async () => {
+  it("stores mandatory Direct Contact Details and leaves Online Links null", async () => {
     const seeded = await seedUnclaimedInvite(db, {
       code: "DEV-CCCC-0006",
       email: "gina@example.com",
@@ -135,7 +150,11 @@ describe("submitOnboarding (S1 integration seam)", () => {
       email: seeded.email,
       code: seeded.code,
       ...BASE_PROFILE,
-      socials: { linkedin: "gina-li", phone: "   " },
+      socials: {
+        phone: "+442079460018",
+        email: "gina@example.co.uk",
+        linkedin: "gina-li",
+      },
     });
 
     expect(result).toEqual({ kind: "ok" });
@@ -149,8 +168,35 @@ describe("submitOnboarding (S1 integration seam)", () => {
     ]);
     expect(socials.rows).toHaveLength(1);
     expect(socials.rows[0].linkedin).toBe("gina-li");
-    expect(socials.rows[0].phone).toBeNull();
-    expect(socials.rows[0].email).toBeNull();
+    expect(socials.rows[0].phone).toBe("+442079460018");
+    expect(socials.rows[0].email).toBe("gina@example.co.uk");
+  });
+
+  it.each([
+    ["phone without a country prefix", "0721234567", "alice@example.com"],
+    ["phone with an invalid length", "+40123", "alice@example.com"],
+    ["malformed Contact Email", "+40721234567", "alice.example.com"],
+  ])("rejects %s before claiming the Invite", async (_case, phone, contactEmail) => {
+    const seeded = await seedUnclaimedInvite(db, {
+      code: `DEV-DDDD-${crypto.randomUUID().slice(0, 4)}`,
+      email: "alice@example.com",
+    });
+
+    const result = await submitOnboarding(pgliteOnboardingAdapter(db), {
+      userId: seeded.userId,
+      email: seeded.email,
+      code: seeded.code,
+      ...BASE_PROFILE,
+      socials: { phone, email: contactEmail },
+    });
+
+    expect(result).toEqual({ kind: "missingFields" });
+
+    const invite = await db.query<{ claimed_by: string | null }>(
+      `select claimed_by from invites where code = $1`,
+      [seeded.code],
+    );
+    expect(invite.rows[0].claimed_by).toBeNull();
   });
 
   it("returns alreadyClaimed and creates no rows when code is already claimed", async () => {

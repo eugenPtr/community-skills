@@ -1,4 +1,8 @@
 import { claimInvite, type InviteRpcClient } from "@/lib/invites/claim";
+import {
+  isPossiblePhoneNumber,
+  parsePhoneNumber,
+} from "libphonenumber-js/max";
 
 export type SubmitOnboardingResult =
   | { kind: "ok" }
@@ -65,13 +69,21 @@ export async function submitOnboarding(
     socials?: SocialsInput;
   },
 ): Promise<SubmitOnboardingResult> {
+  const phone = opts.socials?.phone?.trim() ?? "";
+  const contactEmail = opts.socials?.email?.trim() ?? "";
+  const validContactEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail);
+  const validPhone =
+    phone.startsWith("+") && isPossiblePhoneNumber(phone);
+
   if (
     !opts.firstName.trim() ||
     !opts.lastName.trim() ||
     !opts.location.trim() ||
     !opts.skills.trim() ||
     !opts.passions.trim() ||
-    (!opts.heartProjectSeeking && !opts.heartProjectDescription?.trim())
+    (!opts.heartProjectSeeking && !opts.heartProjectDescription?.trim()) ||
+    !validPhone ||
+    !validContactEmail
   ) {
     return { kind: "missingFields" };
   }
@@ -101,6 +113,8 @@ export async function submitOnboarding(
   const socials = Object.fromEntries(
     SOCIALS_FIELDS.map((f) => [f, opts.socials?.[f]?.trim() || null]),
   ) as Record<(typeof SOCIALS_FIELDS)[number], string | null>;
+  socials.phone = parsePhoneNumber(phone).number;
+  socials.email = contactEmail;
 
   if (Object.values(socials).some((v) => v !== null)) {
     const { error: socialsError } = await client.upsertSocials({

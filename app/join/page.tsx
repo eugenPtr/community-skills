@@ -28,17 +28,13 @@ export default function JoinPage() {
       <div>
         <h1 className="text-2xl font-semibold">Intră în rețea</h1>
         <p className="mt-2 text-sm text-zinc-600">
-          Această rețea este pentru bărbații care au participat la cel puțin un
-          Cerc de Bărbați la Camping Fain.
+          Ca să intri, cere un link de invitație unui administrator al comunității.
         </p>
-        <p className="mt-2 text-sm text-zinc-600">
-          Ca să intri, cere unui administrator al comunității să-ți trimită un
-          link de invitație.
+         <p className="mt-2 text-sm text-zinc-600">
+          Ai deja un link de invitație? Dă click pe el ca să intri.
         </p>
       </div>
-      <p className="text-sm text-zinc-600">
-        Ai deja un link de invitație? Dă click pe el ca să intri.
-      </p>
+
     </main>
   );
 }
