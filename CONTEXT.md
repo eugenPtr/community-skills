@@ -96,6 +96,16 @@ The whole body of Fain men in the network — the people, not a page. Used in pr
 headings (e.g. "the Fain Men Community"). For the page that lists them, see Members.
 _Avoid_: using this word for the listing page
 
+**Donation Prompt**:
+An invitation shown to authenticated Members and Admins to voluntarily support the network's
+operating costs. It is never shown during sign-in, invite acceptance, or onboarding.
+_Avoid_: Paywall, fee, payment request
+
+**Donation Details**:
+Eugen's display-only Revolut coordinates offered through the Donation Prompt: a Revolut tag or
+the shared RON/EUR IBAN and beneficiary name. Members copy these details and donate outside the network.
+_Avoid_: Payment flow, checkout, donation link
+
 **Members** (the page):
 The browsable listing of all Members, shown in alphabetical order. Every Member can see
 every other Member's full profile here, including social links. Discovery complement to
