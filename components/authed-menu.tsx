@@ -30,7 +30,7 @@ export function AuthedMenu({ isAdmin = false }: { isAdmin?: boolean }) {
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between bg-background px-4 py-3">
       <Link href="/" className="text-sm font-semibold text-white">
-        Colectia de resurse
+        Reteaua de suport
       </Link>
 
       <div ref={ref} className="relative">

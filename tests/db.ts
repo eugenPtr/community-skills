@@ -584,6 +584,9 @@ export function pgliteConversationsAdapter(db: PGlite): ConversationsDbClient {
         title,
       ]);
     },
+    async deleteConversation(conversationId) {
+      await db.query(`delete from conversations where id = $1`, [conversationId]);
+    },
     async listMessages(conversationId) {
       const result = await db.query<{ role: "user" | "assistant"; content: string }>(
         `select role, content from messages

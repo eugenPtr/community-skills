@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import {
   createConversation,
+  deleteConversation,
   supabaseConversationsClient,
 } from "@/lib/people-search/conversations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -32,4 +33,30 @@ export async function startConversation(formData: FormData) {
     user.id,
   );
   redirect(`/chat/${id}?q=${encodeURIComponent(q)}`);
+}
+
+export async function deleteConversationAction(
+  conversationId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!conversationId) {
+    return { ok: false, error: "Conversația nu a putut fi ștearsă." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: "Trebuie să fii autentificat." };
+  }
+
+  try {
+    await deleteConversation(
+      supabaseConversationsClient(supabase),
+      conversationId,
+    );
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Conversația nu a putut fi ștearsă." };
+  }
 }

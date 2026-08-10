@@ -7,6 +7,7 @@ import {
   type ComponentProps,
 } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { Streamdown } from "streamdown";
@@ -49,6 +50,7 @@ export function ChatView({
   initialMessages: UIMessage[];
   initialQuery?: string;
 }) {
+  const router = useRouter();
   const { messages, sendMessage, status, error } = useChat({
     id: conversationId,
     messages: initialMessages,
@@ -62,6 +64,18 @@ export function ChatView({
   const memberMessages = messages.filter((m) => m.role === "user").length;
   const atCap = memberMessages >= MEMBER_MESSAGE_CAP;
   const busy = status === "submitted" || status === "streaming";
+  const wasBusy = useRef(false);
+
+  useEffect(() => {
+    if (busy) {
+      wasBusy.current = true;
+      return;
+    }
+    if (wasBusy.current) {
+      wasBusy.current = false;
+      router.refresh();
+    }
+  }, [busy, router]);
 
   // First send from the home route arrives as ?q=...; fire it once.
   const autoSent = useRef(false);

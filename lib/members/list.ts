@@ -71,19 +71,27 @@ export function supabaseListMembersClient(
   return {
     async fetchMemberCards() {
       const { data, error } = await supabase
-        .from("profiles")
+        .from("members")
         .select(
-          "member_id, first_name, last_name, heart_project_description, heart_project_seeking, resources(description, classification, position)",
+          "id, profiles!inner(first_name, last_name, heart_project_description, heart_project_seeking), resources(description, classification, position)",
         );
       return {
         data:
-          data?.map((r) => ({
-            id: r.member_id,
-            name: `${r.first_name} ${r.last_name}`,
-            heartProjectDescription: r.heart_project_description,
-            heartProjectSeeking: r.heart_project_seeking,
-            resources: r.resources,
-          })) ?? null,
+          data?.map((r) => {
+            // PostgREST returns this primary-key relation as one object. The
+            // untyped Supabase client conservatively infers an array, so keep
+            // the adapter tolerant of either representation at this boundary.
+            const profile = Array.isArray(r.profiles)
+              ? r.profiles[0]
+              : r.profiles;
+            return {
+              id: r.id,
+              name: `${profile.first_name} ${profile.last_name}`,
+              heartProjectDescription: profile.heart_project_description,
+              heartProjectSeeking: profile.heart_project_seeking,
+              resources: r.resources,
+            };
+          }) ?? null,
         error: error ? { message: error.message } : null,
       };
     },

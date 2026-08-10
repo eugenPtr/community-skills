@@ -49,6 +49,7 @@ export async function generateTitle(firstMessage: string): Promise<string> {
   try {
     const { text } = await generateText({
       model: answerModel,
+      maxOutputTokens: 24,
       prompt: `Rezumă următoarea cerere într-un titlu scurt în română (maxim 5 cuvinte, fără ghilimele):\n\n${firstMessage}`,
     });
     return text.trim().replace(/^["']|["']$/g, "").slice(0, 80);

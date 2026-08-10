@@ -80,6 +80,13 @@ export async function POST(req: Request) {
     return new Response("Message limit reached", { status: 429 });
   }
 
+  // Title the Conversation from the first question before starting the main
+  // answer stream. This remains independent of retrieval/answer failures, and
+  // the client refreshes the sidebar once the request settles.
+  if (isFirstTurn) {
+    await conversations.setTitle(conversationId, await generateTitle(query));
+  }
+
   const { result } = await searchMembers(
     {
       embedder: gatewayEmbedder,
@@ -95,12 +102,6 @@ export async function POST(req: Request) {
               role: "assistant",
               content: text,
             });
-            if (isFirstTurn) {
-              await conversations.setTitle(
-                conversationId,
-                await generateTitle(query),
-              );
-            }
           },
         }),
     },

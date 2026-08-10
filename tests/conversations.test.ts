@@ -3,6 +3,7 @@ import type { PGlite } from "@electric-sql/pglite";
 import {
   addMessage,
   createConversation,
+  deleteConversation,
   MEMBER_MESSAGE_CAP,
 } from "@/lib/people-search/conversations";
 import { createTestDb, pgliteConversationsAdapter, seedMember } from "./db";
@@ -72,6 +73,22 @@ describe("conversations persistence", () => {
       { role: "assistant", content: "b" },
       { role: "user", content: "c" },
     ]);
+  });
+
+  it("deletes a Conversation and cascades its messages", async () => {
+    const conversationId = await createConversation(adapter, memberId);
+    await addMessage(adapter, {
+      conversationId,
+      role: "user",
+      content: "prima întrebare",
+    });
+
+    await deleteConversation(adapter, conversationId);
+
+    const conversations = await adapter.listConversations(memberId);
+    const messages = await adapter.listMessages(conversationId);
+    expect(conversations).toHaveLength(0);
+    expect(messages).toHaveLength(0);
   });
 
   it("retention deletes Conversations idle beyond 90 days, keeps recent ones", async () => {

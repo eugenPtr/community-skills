@@ -32,6 +32,7 @@ export interface ConversationsDbClient {
   }): PromiseLike<void>;
   touchConversation(conversationId: string): PromiseLike<void>;
   setTitle(conversationId: string, title: string): PromiseLike<void>;
+  deleteConversation(conversationId: string): PromiseLike<void>;
   listMessages(conversationId: string): PromiseLike<ConversationMessage[]>;
   listConversations(memberId: string): PromiseLike<ConversationSummary[]>;
   deleteExpiredConversations(): PromiseLike<void>;
@@ -60,6 +61,13 @@ export async function createConversation(
 ): Promise<string> {
   const { id } = await db.createConversation(memberId);
   return id;
+}
+
+export async function deleteConversation(
+  db: ConversationsDbClient,
+  conversationId: string,
+): Promise<void> {
+  await db.deleteConversation(conversationId);
 }
 
 // Production adapter over the cookie-bound server client: RLS ("own
@@ -106,6 +114,14 @@ export function supabaseConversationsClient(
         .update({ title })
         .eq("id", conversationId);
       if (error) throw new Error(`setTitle failed: ${error.message}`);
+    },
+    async deleteConversation(conversationId) {
+      const { error } = await supabase
+        .from("conversations")
+        .delete()
+        .eq("id", conversationId);
+      if (error)
+        throw new Error(`deleteConversation failed: ${error.message}`);
     },
     async listMessages(conversationId) {
       const { data, error } = await supabase
