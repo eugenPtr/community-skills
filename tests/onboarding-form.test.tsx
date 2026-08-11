@@ -14,7 +14,12 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: mocks.replace }
 vi.mock("sonner", () => ({ toast: mocks.toast }));
 
 describe("OnboardingForm", () => {
-  beforeEach(() => { localStorage.clear(); vi.clearAllMocks(); });
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: vi.fn(() => "blob:profile-photo") });
+    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
+  });
   afterEach(cleanup);
 
   async function reachResources(user: ReturnType<typeof userEvent.setup>) {
@@ -60,6 +65,24 @@ describe("OnboardingForm", () => {
     await addFreeResource(user);
     expect(screen.getByRole("button", { name: "Înainte" })).toBeEnabled();
     expect(mocks.toast.success).not.toHaveBeenCalled();
+  });
+
+  it("allows the same photo to be selected again after eliminating it", async () => {
+    const user = userEvent.setup();
+    render(<OnboardingForm invite="DEV" memberId="m1" loginEmail="ana@example.com" />);
+    await user.click(screen.getByRole("button", { name: "Începe" }));
+    const input = screen.getByLabelText("Incarca o fotografia de profil");
+    const photo = new File(["photo"], "profil.png", { type: "image/png" });
+
+    await user.upload(input, photo);
+    expect(screen.queryByLabelText("Schimba")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Elimină selecția" }));
+    expect(screen.getByLabelText("Incarca o fotografia de profil")).toBeInTheDocument();
+
+    const replacementInput = screen.getByLabelText("Incarca o fotografia de profil");
+    await user.upload(replacementInput, photo);
+    expect(screen.queryByLabelText("Schimba")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Elimină selecția" })).toBeInTheDocument();
   });
 
   it("submits classified Resources in their visible order", async () => {

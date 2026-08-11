@@ -39,11 +39,17 @@ export default async function OnboardingPage({
     );
   }
 
+  const { data: communities } = await supabase
+    .from("affiliated_communities")
+    .select("id, name")
+    .order("name");
+
   return (
     <OnboardingForm
       invite={invite}
       memberId={user.id}
       loginEmail={user.email ?? ""}
+      communities={communities ?? []}
     />
   );
 }

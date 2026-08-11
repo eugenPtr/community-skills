@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProfileAvatar } from "@/components/profile-avatar";
 import { type MemberProfile, type SocialKey } from "@/lib/profile/get";
 
 // One presentational Profile, rendering both /profile and /profile/{memberId}.
@@ -50,21 +51,29 @@ export function ProfileView({
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+      <div className="flex items-center gap-4">
+        <ProfileAvatar name={profile.name} photoUrl={profile.photoUrl} size="lg" />
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h1 className="text-2xl font-semibold">{profile.name}</h1>
         {isOwn && (
           <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
             Tu
           </span>
         )}
+          </div>
+          <p className="mt-1 text-sm text-zinc-300">{profile.location}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {(profile.communities ?? []).map((community) => <span key={community.id} className="rounded-full bg-zinc-800 px-2.5 py-1 text-xs text-zinc-200">{community.name}</span>)}
+          </div>
+        </div>
       </div>
-      <p className="mt-1 text-sm text-zinc-300">{profile.location}</p>
       {isOwn && (
         <Link
-          href="/profile/resources"
+          href="/profile/edit"
           className="mt-5 inline-flex rounded-lg border border-zinc-500 px-3 py-2 text-sm font-semibold text-white hover:border-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
         >
-          Editează resursele
+          Editează profilul
         </Link>
       )}
 

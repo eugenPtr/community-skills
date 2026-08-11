@@ -38,8 +38,23 @@ _Avoid_: Admin panel, console, backoffice
 
 **Profile**:
 The information a Member publishes about themselves: name, location, Contact Details, Heart Project,
-Passions, and Resources.
+Passions, Resources, Community Affiliations, and an optional Profile Photo.
 _Avoid_: Bio, page, account
+
+**Profile Photo**:
+An optional image a Member publishes with their Profile. It is visible only to Members; a Member
+without one is represented by a placeholder, and a published photo may be replaced but not removed.
+_Avoid_: Avatar, portrait
+
+**Community Affiliation**:
+A Member's declared membership in one or more Affiliated Communities. Every Member has at least
+one; existing Members initially belong to Bărbați la Fain.
+_Avoid_: Community, organization, label, tag
+
+**Affiliated Community**:
+An approved men's community to which Members may declare an affiliation. The initial catalog is
+ManKind Project, Bărbați în Comuniune, and Bărbați la Fain, and may grow over time.
+_Avoid_: Community, organization, network, label
 
 **Contact Details**:
 The ways a Member can be reached or found, published on their Profile. Comprises mandatory Direct

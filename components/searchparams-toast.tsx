@@ -19,6 +19,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 // panel (checkInbox=1) rendered by the sign-in page, not a toast.
 const SENT_MESSAGES: Record<string, string> = {
   "resources-updated": "Resursele au fost actualizate.",
+  "profile-updated": "Profilul a fost actualizat.",
 };
 const SENT_MESSAGE_NEUTRAL =
   "Dacă există un cont pentru acest email, a fost trimis un link.";

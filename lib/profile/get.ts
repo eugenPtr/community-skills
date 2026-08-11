@@ -18,10 +18,15 @@ export type SocialKey = (typeof SOCIAL_KEYS)[number];
 export interface MemberProfile {
   id: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   location: string;
   passions: string;
   heartProjectDescription: string | null;
   heartProjectSeeking: boolean;
+  profilePhotoPath?: string | null;
+  photoUrl?: string | null;
+  communities?: Array<{ id: string; name: string }>;
   // Only the Social Links the Member actually set. Absent key = not published.
   socials: Partial<Record<SocialKey, string>>;
   resources: Resource[];
@@ -30,10 +35,14 @@ export interface MemberProfile {
 interface ProfileRow {
   id: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   location: string;
   passions: string;
   heartProjectDescription: string | null;
   heartProjectSeeking: boolean;
+  profilePhotoPath?: string | null;
+  photoUrl?: string | null;
 }
 
 export interface GetProfileClient {
@@ -47,6 +56,10 @@ export interface GetProfileClient {
   }>;
   fetchResources(memberId: string): PromiseLike<{
     data: Resource[] | null;
+    error: { message: string } | null;
+  }>;
+  fetchCommunities?(memberId: string): PromiseLike<{
+    data: Array<{ id: string; name: string }> | null;
     error: { message: string } | null;
   }>;
 }
@@ -69,6 +82,9 @@ export async function getProfile(
   }
   const { data: resources, error: resourcesError } = await client.fetchResources(memberId);
   if (resourcesError) throw new Error(`getProfile resources failed: ${resourcesError.message}`);
+  const { data: communities, error: communitiesError } = client.fetchCommunities
+    ? await client.fetchCommunities(memberId) : { data: [], error: null };
+  if (communitiesError) throw new Error(`getProfile communities failed: ${communitiesError.message}`);
 
   const socials: Partial<Record<SocialKey, string>> = {};
   if (socialsRow) {
@@ -78,7 +94,7 @@ export async function getProfile(
     }
   }
 
-  return { ...profile, socials, resources: resources ?? [] };
+  return { ...profile, socials, resources: resources ?? [], communities: communities ?? [] };
 }
 
 // Production adapter over the cookie-bound server client (ADR-0006 RLS).
@@ -90,19 +106,26 @@ export function supabaseGetProfileClient(
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "member_id, first_name, last_name, location, passions, heart_project_description, heart_project_seeking",
+          "member_id, first_name, last_name, location, passions, heart_project_description, heart_project_seeking, profile_photo_path",
         )
         .eq("member_id", memberId)
         .maybeSingle();
+      const signed = data?.profile_photo_path
+        ? await supabase.storage.from("profile-photos").createSignedUrl(data.profile_photo_path, 3600)
+        : null;
       return {
         data: data
           ? {
               id: data.member_id,
               name: `${data.first_name} ${data.last_name}`,
+              firstName: data.first_name,
+              lastName: data.last_name,
               location: data.location,
               passions: data.passions,
               heartProjectDescription: data.heart_project_description,
               heartProjectSeeking: data.heart_project_seeking,
+              profilePhotoPath: data.profile_photo_path,
+              photoUrl: signed?.data?.signedUrl ?? null,
             }
           : null,
         error: error ? { message: error.message } : null,
@@ -126,6 +149,18 @@ export function supabaseGetProfileClient(
         .order("classification", { ascending: true })
         .order("position", { ascending: true });
       return { data: data as Resource[] | null, error: error ? { message: error.message } : null };
+    },
+    async fetchCommunities(memberId) {
+      const { data, error } = await supabase.from("profile_community_affiliations")
+        .select("affiliated_communities!inner(id, name)").eq("member_id", memberId);
+      return {
+        data: data?.map((row) => {
+          const community = Array.isArray(row.affiliated_communities)
+            ? row.affiliated_communities[0] : row.affiliated_communities;
+          return { id: community.id, name: community.name };
+        }).sort((a, b) => a.name.localeCompare(b.name, "ro")) ?? null,
+        error: error ? { message: error.message } : null,
+      };
     },
   };
 }

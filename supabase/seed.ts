@@ -342,6 +342,15 @@ async function ensureAuthUser(p: Persona): Promise<string> {
 async function main() {
   await seedDevInvites();
 
+  const { data: defaultCommunity, error: communityError } = await admin
+    .from("affiliated_communities")
+    .select("id")
+    .eq("name", "ManKind Project")
+    .single();
+  if (communityError || !defaultCommunity) {
+    throw new Error(`default community ManKind Project: ${communityError?.message ?? "missing"}`);
+  }
+
   let created = 0;
   let reused = 0;
   for (const [personaIndex, p] of personas.entries()) {
@@ -375,6 +384,21 @@ async function main() {
       { onConflict: "member_id" },
     );
     if (pr.error) throw new Error(`profiles ${p.loginEmail}: ${pr.error.message}`);
+
+    const removedAffiliations = await admin
+      .from("profile_community_affiliations")
+      .delete()
+      .eq("member_id", memberId);
+    if (removedAffiliations.error) {
+      throw new Error(`community cleanup ${p.loginEmail}: ${removedAffiliations.error.message}`);
+    }
+    const affiliation = await admin.from("profile_community_affiliations").insert({
+      member_id: memberId,
+      community_id: defaultCommunity.id,
+    });
+    if (affiliation.error) {
+      throw new Error(`community affiliation ${p.loginEmail}: ${affiliation.error.message}`);
+    }
 
     const normalizeDescription = (value: string) =>
       value.trim().replace(/\s+/g, " ").slice(0, 255).trim();

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { MemberCard as MemberCardData } from "@/lib/members/list";
+import { ProfileAvatar } from "@/components/profile-avatar";
 
 export function MemberCard({ member, isOwn }: { member: MemberCardData; isOwn: boolean }) {
   const href = isOwn ? "/profile" : `/profile/${member.id}`;
@@ -14,7 +15,10 @@ export function MemberCard({ member, isOwn }: { member: MemberCardData; isOwn: b
         href={href}
         className="flex h-full flex-col rounded-xl border border-zinc-600 bg-zinc-700 p-4 transition hover:border-zinc-500 hover:shadow-sm"
       >
-        <h2 className="font-semibold text-white">{member.name}</h2>
+        <div className="flex items-center gap-3">
+          <ProfileAvatar name={member.name} photoUrl={member.photoUrl} size="sm" />
+          <h2 className="font-semibold text-white">{member.name}</h2>
+        </div>
         <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
           Resurse
         </p>

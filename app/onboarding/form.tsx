@@ -12,12 +12,14 @@ import { getExampleNumber, isPossiblePhoneNumber } from "libphonenumber-js/max";
 import examples from "libphonenumber-js/mobile/examples";
 import { toast } from "sonner";
 import { ResourceEditor, type EditableResource } from "@/components/resource-editor";
+import { ProfilePhotoPicker } from "@/components/profile-photo-picker";
 
 type OnboardingFormProps = {
   invite: string;
   memberId: string;
   loginEmail: string;
   testMode?: boolean;
+  communities?: Array<{ id: string; name: string }>;
 };
 
 const fieldClass = (invalid: boolean) =>
@@ -47,6 +49,7 @@ export default function OnboardingForm({
   invite,
   memberId,
   testMode = false,
+  communities = [{ id: "test-community", name: "Bărbați la Fain" }],
 }: OnboardingFormProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -68,7 +71,10 @@ export default function OnboardingForm({
     facebook: "",
     instagram: "",
     x: "",
+    communityIds: (communities.length === 1 && communities[0].id === "test-community" ? [communities[0].id] : []) as string[],
   });
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [phoneCountry, setPhoneCountry] = useState<Country | undefined>("RO");
   const [submitting, setSubmitting] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
@@ -76,7 +82,7 @@ export default function OnboardingForm({
 
   const stepComplete =
     step === 1
-      ? [values.firstName, values.lastName, values.location].every((value) => value.trim())
+      ? [values.firstName, values.lastName, values.location].every((value) => value.trim()) && values.communityIds.length > 0
       : step === 2
         ? Boolean(
             values.passions.trim() &&
@@ -106,7 +112,7 @@ export default function OnboardingForm({
             phoneCountry?: Country;
           };
           if (
-            draft.version !== 3 ||
+            draft.version !== 4 ||
             !draft.expiresAt ||
             draft.expiresAt <= Date.now() ||
             !draft.values
@@ -150,7 +156,7 @@ export default function OnboardingForm({
     localStorage.setItem(
       draftKey,
       JSON.stringify({
-        version: 3,
+        version: 4,
         expiresAt: Date.now() + DRAFT_TTL_MS,
         step,
         values,
@@ -158,6 +164,18 @@ export default function OnboardingForm({
       }),
     );
   }, [draftKey, draftLoaded, phoneCountry, step, values]);
+
+  useEffect(() => () => { if (photoPreview) URL.revokeObjectURL(photoPreview); }, [photoPreview]);
+
+  function selectPhoto(file?: File) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error("Alege o imagine JPEG, PNG sau WebP."); return;
+    }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Fotografia trebuie să aibă cel mult 5 MB."); return; }
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhoto(file); setPhotoPreview(URL.createObjectURL(file));
+  }
 
   function update(field: Exclude<keyof typeof values, "resources">, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -167,9 +185,9 @@ export default function OnboardingForm({
   function next() {
     const missing =
       step === 1
-        ? (["firstName", "lastName", "location"] as const).filter(
+        ? [...(["firstName", "lastName", "location"] as const).filter(
             (field) => !values[field].trim(),
-          )
+          ), ...(values.communityIds.length === 0 ? ["communityIds"] : [])]
         : step === 2 ? [
             ...(["passions"] as const).filter((field) => !values[field].trim()),
             ...(values.heartProject === null ? ["heartProject"] : []),
@@ -228,11 +246,15 @@ export default function OnboardingForm({
       facebook: values.facebook,
       instagram: values.instagram,
       x: values.x,
+      community_ids: JSON.stringify(values.communityIds),
     };
     Object.entries(entries).forEach(([name, value]) => formData.set(name, value));
+    if (photo) formData.set("profile_photo", photo);
 
     try {
       const result = await submitOnboardingAction(formData);
+      if (result?.kind === "invalidPhoto") { toast.error("Fișierul nu este o imagine JPEG, PNG sau WebP validă."); return; }
+      if (result?.kind === "photoUploadFailed") { toast.error("Fotografia nu a putut fi încărcată. Încearcă din nou sau elimină selecția."); return; }
       if (result?.kind === "ok") {
         localStorage.removeItem(draftKey);
         router.replace("/");
@@ -306,7 +328,19 @@ export default function OnboardingForm({
               : step === 3 ? "Ce resurse poți oferi comunității?" : "Contact"}
         </h2>
 
-        {step === 1 ? <><div className="grid gap-4 sm:grid-cols-2">
+        {step === 1 ? <>
+        <div className="space-y-2">
+          <ProfilePhotoPicker
+            id="profile_photo"
+            name={`${values.firstName} ${values.lastName}`}
+            photoUrl={photoPreview}
+            hasPhoto={Boolean(photo)}
+            hideActionWhenPhoto
+            onChange={selectPhoto}
+          />
+          {photo ? <button type="button" onClick={() => { setPhoto(null); setPhotoPreview(null); }} className="self-start text-sm underline">Elimină selecția</button> : null}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="first_name" className="text-sm font-medium">
               Prenume (obligatoriu)
@@ -351,6 +385,18 @@ export default function OnboardingForm({
             className={fieldClass(invalid.includes("location"))}
           />
         </div>
+
+        <fieldset aria-invalid={invalid.includes("communityIds")} className={`rounded-lg border p-4 ${invalid.includes("communityIds") ? "border-red-600" : "border-zinc-700"}`}>
+          <legend className="px-1 text-sm font-medium">Din ce comunitate faci parte? (obligatoriu)</legend>
+          <div className="mt-2 space-y-2">
+            {communities.map((community) => <label key={community.id} className="flex items-center gap-3 text-sm">
+              <input type="checkbox" checked={values.communityIds.includes(community.id)} onChange={(event) => {
+                setValues((current) => ({ ...current, communityIds: event.target.checked ? [...current.communityIds, community.id] : current.communityIds.filter((id) => id !== community.id) }));
+                setInvalid((current) => current.filter((name) => name !== "communityIds"));
+              }} className="size-4 accent-purple-600" /> {community.name}
+            </label>)}
+          </div>
+        </fieldset>
 
         </> : null}
 

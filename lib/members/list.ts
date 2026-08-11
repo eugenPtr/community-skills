@@ -12,6 +12,7 @@ interface MemberCardRow {
   heartProjectDescription: string | null;
   heartProjectSeeking: boolean;
   resources: MemberResourcePreview[];
+  photoUrl?: string | null;
 }
 
 // One Member's card on the Members listing. Location, Passions and Social Links
@@ -25,6 +26,7 @@ export interface MemberCard {
   heartProjectSeeking: boolean;
   resources: MemberResourcePreview[];
   resourceCount: number;
+  photoUrl?: string | null;
 }
 
 // The seam `listMembers` reads through: a Supabase client in production, a
@@ -73,25 +75,24 @@ export function supabaseListMembersClient(
       const { data, error } = await supabase
         .from("members")
         .select(
-          "id, profiles!inner(first_name, last_name, heart_project_description, heart_project_seeking), resources(description, classification, position)",
+          "id, profiles!inner(first_name, last_name, heart_project_description, heart_project_seeking, profile_photo_path), resources(description, classification, position)",
         );
+      const mapped = await Promise.all((data ?? []).map(async (r) => {
+        const profile = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
+        const signed = profile.profile_photo_path
+          ? await supabase.storage.from("profile-photos").createSignedUrl(profile.profile_photo_path, 3600)
+          : null;
+        return {
+          id: r.id,
+          name: `${profile.first_name} ${profile.last_name}`,
+          heartProjectDescription: profile.heart_project_description,
+          heartProjectSeeking: profile.heart_project_seeking,
+          resources: r.resources,
+          photoUrl: signed?.data?.signedUrl ?? null,
+        };
+      }));
       return {
-        data:
-          data?.map((r) => {
-            // PostgREST returns this primary-key relation as one object. The
-            // untyped Supabase client conservatively infers an array, so keep
-            // the adapter tolerant of either representation at this boundary.
-            const profile = Array.isArray(r.profiles)
-              ? r.profiles[0]
-              : r.profiles;
-            return {
-              id: r.id,
-              name: `${profile.first_name} ${profile.last_name}`,
-              heartProjectDescription: profile.heart_project_description,
-              heartProjectSeeking: profile.heart_project_seeking,
-              resources: r.resources,
-            };
-          }) ?? null,
+        data: data ? mapped : null,
         error: error ? { message: error.message } : null,
       };
     },

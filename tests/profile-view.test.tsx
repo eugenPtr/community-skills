@@ -32,8 +32,8 @@ describe("ProfileView Resources", () => {
 
   it("shows Resource editing only on the owner's Profile", () => {
     const { rerender } = render(<ProfileView isOwn profile={{ ...base, resources: [] }} />);
-    expect(screen.getByRole("link", { name: "Editează resursele" })).toHaveAttribute("href", "/profile/resources");
+    expect(screen.getByRole("link", { name: "Editează profilul" })).toHaveAttribute("href", "/profile/edit");
     rerender(<ProfileView isOwn={false} profile={{ ...base, resources: [] }} />);
-    expect(screen.queryByRole("link", { name: "Editează resursele" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Editează profilul" })).not.toBeInTheDocument();
   });
 });

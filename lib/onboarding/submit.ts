@@ -18,6 +18,7 @@ interface OnboardingPayload {
   userId: string; email: string; code: string; firstName: string; lastName: string;
   location: string; passions: string; heartProjectSeeking: boolean;
   heartProjectDescription?: string; resources: ResourceInput[]; socials?: SocialsInput;
+  communityIds?: string[]; profilePhotoPath?: string;
 }
 
 export interface OnboardingDbClient {
@@ -41,7 +42,7 @@ export async function submitOnboarding(
   if (!opts.firstName.trim() || !opts.lastName.trim() || !opts.location.trim() ||
       !opts.passions.trim() || (!opts.heartProjectSeeking && !opts.heartProjectDescription?.trim()) ||
       !phone.startsWith("+") || !isPossiblePhoneNumber(phone) ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail) || !resources) {
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail) || !resources || opts.communityIds?.length === 0) {
     return { kind: "missingFields" };
   }
 
@@ -60,7 +61,7 @@ export async function submitOnboarding(
   socials.email = contactEmail;
 
   const { error } = await deps.db.completeOnboarding({
-    ...opts, resources: indexed, socials, profileContextEmbedding, profileContextEmbeddingInput,
+    ...opts, communityIds: opts.communityIds ?? ["test-community"], resources: indexed, socials, profileContextEmbedding, profileContextEmbeddingInput,
   });
   if (!error) return { kind: "ok" };
   if (error.code === "P0001") return { kind: "invalidCode" };
