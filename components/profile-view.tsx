@@ -79,14 +79,14 @@ export function ProfileView({
 
       <section className="mt-8 space-y-6">
         {([
-          ["Resurse gratis", freeResources],
-          ["Resurse contra cost", paidResources],
-        ] as const).map(([title, resources]) => resources.length > 0 ? (
+          ["Resurse gratis", freeResources, "border-emerald-500/70"],
+          ["Resurse contra cost", paidResources, "border-sky-500/70"],
+        ] as const).map(([title, resources, borderClass]) => resources.length > 0 ? (
           <div key={title}>
             <h2 className="text-sm font-semibold text-zinc-300">{title}</h2>
             <ul className="mt-2 space-y-2">
               {resources.map((resource) => (
-                <li key={resource.id} className="whitespace-pre-wrap break-words rounded-lg border border-zinc-700 px-3 py-2 text-sm text-white">
+                <li key={resource.id} className={`whitespace-pre-wrap break-words rounded-lg border px-3 py-2 text-sm text-white ${borderClass}`}>
                   {resource.description}
                 </li>
               ))}
@@ -95,13 +95,13 @@ export function ProfileView({
         ) : null)}
         <div>
           <h2 className="text-sm font-semibold text-zinc-300">Pasiuni</h2>
-          <p className="mt-1 whitespace-pre-line text-sm text-white">
+          <p className="mt-2 whitespace-pre-line rounded-lg border border-zinc-700 px-3 py-2 text-sm text-white">
             {profile.passions}
           </p>
         </div>
         <div>
           <h2 className="text-sm font-semibold text-zinc-300">Proiect de Suflet</h2>
-          <p className="mt-1 whitespace-pre-line text-sm text-white">
+          <p className="mt-2 whitespace-pre-line rounded-lg border border-zinc-700 px-3 py-2 text-sm text-white">
             {heartProject}
           </p>
         </div>

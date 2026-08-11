@@ -19,7 +19,8 @@ describe("ProfileView Resources", () => {
     ] }} />);
     const headings = screen.getAllByRole("heading", { level: 2 }).map((node) => node.textContent);
     expect(headings.indexOf("Resurse gratis")).toBeLessThan(headings.indexOf("Resurse contra cost"));
-    expect(screen.getByText(/descriere completă/)).toBeInTheDocument();
+    expect(screen.getByText(/descriere completă/)).toHaveClass("border-emerald-500/70");
+    expect(screen.getByText("Audit software")).toHaveClass("border-sky-500/70");
   });
 
   it("hides empty Resource categories", () => {
@@ -35,5 +36,11 @@ describe("ProfileView Resources", () => {
     expect(screen.getByRole("link", { name: "Editează profilul" })).toHaveAttribute("href", "/profile/edit");
     rerender(<ProfileView isOwn={false} profile={{ ...base, resources: [] }} />);
     expect(screen.queryByRole("link", { name: "Editează profilul" })).not.toBeInTheDocument();
+  });
+
+  it("frames Passions and Heart Project with neutral borders", () => {
+    render(<ProfileView isOwn={false} profile={{ ...base, resources: [] }} />);
+    expect(screen.getByText("Muzică")).toHaveClass("border-zinc-700");
+    expect(screen.getByText("În căutare")).toHaveClass("border-zinc-700");
   });
 });

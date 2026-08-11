@@ -56,6 +56,18 @@ describe("listMembers (S1 integration seam)", () => {
     expect(byName["Devoted Two"].heartProjectDescription).toBe("Restoring a watermill");
   });
 
+  it("carries Passions for the card preview", async () => {
+    await seedMember(db, {
+      firstName: "Passionate",
+      lastName: "Member",
+      passions: "Muzică și drumeții",
+    });
+
+    const [member] = await listMembers(pgliteListMembersAdapter(db));
+
+    expect(member.passions).toBe("Muzică și drumeții");
+  });
+
   it("returns at most two Resources in free-first persisted order with an accurate total", async () => {
     await seedMember(db, {
       firstName: "Resource",

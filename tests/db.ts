@@ -250,13 +250,14 @@ export function pgliteListMembersAdapter(db: PGlite): ListMembersClient {
         member_id: string;
         first_name: string;
         last_name: string;
+        passions: string;
         heart_project_description: string | null;
         heart_project_seeking: boolean;
         resource_description: string | null;
         resource_classification: "free" | "paid" | null;
         resource_position: number | null;
       }>(
-        `select p.member_id, p.first_name, p.last_name, p.heart_project_description,
+        `select p.member_id, p.first_name, p.last_name, p.passions, p.heart_project_description,
                 p.heart_project_seeking, r.description as resource_description,
                 r.classification as resource_classification, r.position as resource_position
            from profiles p
@@ -265,6 +266,7 @@ export function pgliteListMembersAdapter(db: PGlite): ListMembersClient {
       const members = new Map<string, {
         id: string;
         name: string;
+        passions: string;
         heartProjectDescription: string | null;
         heartProjectSeeking: boolean;
         resources: Array<{ description: string; classification: "free" | "paid"; position: number }>;
@@ -273,6 +275,7 @@ export function pgliteListMembersAdapter(db: PGlite): ListMembersClient {
         const member = members.get(r.member_id) ?? {
           id: r.member_id,
           name: `${r.first_name} ${r.last_name}`,
+          passions: r.passions,
           heartProjectDescription: r.heart_project_description,
           heartProjectSeeking: r.heart_project_seeking,
           resources: [],

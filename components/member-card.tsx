@@ -19,10 +19,10 @@ export function MemberCard({ member, isOwn }: { member: MemberCardData; isOwn: b
           <ProfileAvatar name={member.name} photoUrl={member.photoUrl} size="sm" />
           <h2 className="font-semibold text-white">{member.name}</h2>
         </div>
-        <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
+        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-purple-300">
           Resurse
         </p>
-        <ul className="mt-0.5 space-y-1 text-sm text-white">
+        <ul className="mt-1.5 space-y-1 text-sm text-white">
           {member.resources.map((resource) => (
             <li key={`${resource.classification}-${resource.position}`}>
               <span className="font-semibold">
@@ -35,10 +35,16 @@ export function MemberCard({ member, isOwn }: { member: MemberCardData; isOwn: b
         {remainder > 0 ? (
           <p className="mt-1 text-sm font-semibold text-zinc-300">+ încă {remainder}</p>
         ) : null}
-        <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
+        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-purple-300">
+          Pasiuni
+        </p>
+        <p className="mt-1.5 line-clamp-3 text-sm text-white">
+          {member.passions}
+        </p>
+        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-purple-300">
           Proiect de Suflet
         </p>
-        <p className="mt-0.5 line-clamp-3 text-sm text-white">
+        <p className="mt-1.5 line-clamp-3 text-sm text-white">
           {heartProject}
         </p>
       </Link>

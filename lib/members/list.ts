@@ -9,17 +9,19 @@ export interface MemberResourcePreview {
 interface MemberCardRow {
   id: string;
   name: string;
+  passions: string;
   heartProjectDescription: string | null;
   heartProjectSeeking: boolean;
   resources: MemberResourcePreview[];
   photoUrl?: string | null;
 }
 
-// One Member's card on the Members listing. Location, Passions and Social Links
-// remain Profile-page-only (issue #17).
+// One Member's card on the Members listing. Location and Social Links remain
+// Profile-page-only (issue #17).
 export interface MemberCard {
   id: string;
   name: string;
+  passions: string;
   heartProjectDescription: string | null;
   // The seeking flag, not the description, decides "Seeking one" on a card, so
   // the glossary's has-one-or-seeking distinction survives an empty description.
@@ -75,7 +77,7 @@ export function supabaseListMembersClient(
       const { data, error } = await supabase
         .from("members")
         .select(
-          "id, profiles!inner(first_name, last_name, heart_project_description, heart_project_seeking, profile_photo_path), resources(description, classification, position)",
+          "id, profiles!inner(first_name, last_name, passions, heart_project_description, heart_project_seeking, profile_photo_path), resources(description, classification, position)",
         );
       const mapped = await Promise.all((data ?? []).map(async (r) => {
         const profile = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
@@ -85,6 +87,7 @@ export function supabaseListMembersClient(
         return {
           id: r.id,
           name: `${profile.first_name} ${profile.last_name}`,
+          passions: profile.passions,
           heartProjectDescription: profile.heart_project_description,
           heartProjectSeeking: profile.heart_project_seeking,
           resources: r.resources,
