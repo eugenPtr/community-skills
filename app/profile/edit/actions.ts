@@ -7,6 +7,7 @@ import { gatewayEmbedder } from "@/lib/people-search/ai-gateway";
 import { buildProfileContextEmbeddingInput } from "@/lib/people-search/embedding-input";
 import { serializeEmbedding } from "@/lib/people-search/serialize-embedding";
 import { normalizeResources } from "@/lib/resources/model";
+import { withPersistedResourceId } from "@/lib/resources/persistence";
 import { validateProfilePhoto } from "@/lib/profile/photo";
 
 export async function saveProfileAction(formData: FormData) {
@@ -40,7 +41,7 @@ export async function saveProfileAction(formData: FormData) {
   const indexed = await Promise.all(resources.map(async (resource, index) => {
     const id = rawResources[index]?.id && existing.has(rawResources[index].id!) ? rawResources[index].id! : crypto.randomUUID();
     const previous = existing.get(id);
-    return { id, ...resource, position: positions[resource.classification]++, embedding: serializeEmbedding(previous?.embedding_input === resource.description ? previous.embedding : await gatewayEmbedder(resource.description)), embedding_input: resource.description };
+    return { ...withPersistedResourceId(resource, id), position: positions[resource.classification]++, embedding: serializeEmbedding(previous?.embedding_input === resource.description ? previous.embedding : await gatewayEmbedder(resource.description)), embedding_input: resource.description };
   }));
 
   const photo = formData.get("profile_photo");
