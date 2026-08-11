@@ -71,15 +71,15 @@ describe("OnboardingForm", () => {
     const user = userEvent.setup();
     render(<OnboardingForm invite="DEV" memberId="m1" loginEmail="ana@example.com" />);
     await user.click(screen.getByRole("button", { name: "Începe" }));
-    const input = screen.getByLabelText("Incarca o fotografia de profil");
+    const input = screen.getByLabelText("Incarca o fotografie de profil");
     const photo = new File(["photo"], "profil.png", { type: "image/png" });
 
     await user.upload(input, photo);
     expect(screen.queryByLabelText("Schimba")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Elimină selecția" }));
-    expect(screen.getByLabelText("Incarca o fotografia de profil")).toBeInTheDocument();
+    expect(screen.getByLabelText("Incarca o fotografie de profil")).toBeInTheDocument();
 
-    const replacementInput = screen.getByLabelText("Incarca o fotografia de profil");
+    const replacementInput = screen.getByLabelText("Incarca o fotografie de profil");
     await user.upload(replacementInput, photo);
     expect(screen.queryByLabelText("Schimba")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Elimină selecția" })).toBeInTheDocument();

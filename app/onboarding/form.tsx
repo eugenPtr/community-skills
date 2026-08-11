@@ -329,7 +329,7 @@ export default function OnboardingForm({
         </h2>
 
         {step === 1 ? <>
-        <div className="space-y-2">
+        <div className="flex flex-col items-center gap-2 sm:items-start">
           <ProfilePhotoPicker
             id="profile_photo"
             name={`${values.firstName} ${values.lastName}`}
@@ -338,7 +338,7 @@ export default function OnboardingForm({
             hideActionWhenPhoto
             onChange={selectPhoto}
           />
-          {photo ? <button type="button" onClick={() => { setPhoto(null); setPhotoPreview(null); }} className="self-start text-sm underline">Elimină selecția</button> : null}
+          {photo ? <button type="button" onClick={() => { setPhoto(null); setPhotoPreview(null); }} className="text-sm underline">Elimină selecția</button> : null}
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
