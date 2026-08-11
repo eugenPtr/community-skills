@@ -36,8 +36,8 @@ export function SiteFooter() {
   }
 
   return (
-    <footer className="mt-auto border-t border-zinc-700/80 px-6 py-5">
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 text-center text-sm text-zinc-400 sm:flex-row sm:text-left">
+    <footer className="mt-auto shrink-0 border-t border-zinc-700/80 px-4 py-2.5 sm:px-6 sm:py-5">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-1.5 text-center text-sm text-zinc-400 sm:flex-row sm:gap-3 sm:text-left">
         <p className="flex items-center gap-1.5">
           Built with
           <HeartIcon />

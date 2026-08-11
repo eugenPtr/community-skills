@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { Streamdown } from "streamdown";
+import { toast } from "sonner";
 import { MEMBER_MESSAGE_CAP } from "@/lib/people-search/conversations";
 import { isInternalHref } from "@/lib/people-search/link-safety";
 
@@ -61,6 +62,7 @@ export function ChatView({
   });
 
   const [input, setInput] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const memberMessages = messages.filter((m) => m.role === "user").length;
   const atCap = memberMessages >= MEMBER_MESSAGE_CAP;
   const busy = status === "submitted" || status === "streaming";
@@ -91,16 +93,28 @@ export function ChatView({
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (error) toast.error("Ceva n-a mers. Încearcă din nou.");
+  }, [error]);
+
+  function resizeComposer() {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 96)}px`;
+  }
+
   function submit() {
     const text = input.trim();
     if (!text || busy || atCap) return;
     setInput("");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
     sendMessage({ text });
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex-1 space-y-4 overflow-y-auto px-4 py-6">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-6">
         {messages.map((message) =>
           message.role === "user" ? (
             <div key={message.id} className="flex justify-end">
@@ -118,15 +132,10 @@ export function ChatView({
             </div>
           ),
         )}
-        {error && (
-          <p className="text-center text-sm text-red-600">
-            Ceva n-a mers. Încearcă din nou.
-          </p>
-        )}
         <div ref={endRef} />
       </div>
 
-      <div className="border-t border-zinc-800 bg-background px-4 py-3">
+      <div className="shrink-0 bg-background px-4 pb-3 pt-2">
         {atCap ? (
           <p className="text-center text-sm text-zinc-300">
             Ai atins limita de {MEMBER_MESSAGE_CAP} mesaje.{" "}
@@ -137,28 +146,32 @@ export function ChatView({
           </p>
         ) : (
           <>
-            <div className="flex w-full items-end gap-2 rounded-2xl border border-zinc-600 bg-zinc-700 p-3">
+            <div className="flex w-full items-end gap-2 rounded-[1.75rem] border border-zinc-600 bg-zinc-800 p-2 pl-4 shadow-lg shadow-black/20">
               <textarea
-                rows={2}
+                ref={textareaRef}
+                rows={1}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  resizeComposer();
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     submit();
                   }
                 }}
-                placeholder="Spune ce ai nevoie…"
-                className="flex-1 resize-none bg-transparent text-sm text-white outline-none placeholder:text-zinc-400"
+                placeholder="Am nevoie de ..."
+                className="max-h-24 min-h-10 flex-1 resize-none bg-transparent py-2 text-sm leading-6 text-white outline-none placeholder:text-zinc-400"
               />
               <button
                 type="button"
                 onClick={submit}
                 disabled={busy || !input.trim()}
                 aria-label="Trimite"
-                className="rounded-lg bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-purple-600 text-white transition hover:bg-purple-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-300 disabled:bg-zinc-600 disabled:text-zinc-400"
               >
-                Trimite
+                <ArrowUpIcon />
               </button>
             </div>
             <p className="mt-1 text-right text-xs text-zinc-500">
@@ -168,5 +181,13 @@ export function ChatView({
         )}
       </div>
     </div>
+  );
+}
+
+function ArrowUpIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M10 16V4m0 0L5.5 8.5M10 4l4.5 4.5" />
+    </svg>
   );
 }

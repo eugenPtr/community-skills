@@ -24,3 +24,23 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+body:has(.conversation-shell) {
+  height: 100%;
+  overflow: hidden;
+}
+
+@keyframes mobile-menu-enter {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.mobile-menu-drawer {
+  animation: mobile-menu-enter 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu-drawer {
+    animation: none;
+  }
+}

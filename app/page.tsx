@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { AuthedMenu } from "@/components/authed-menu";
 import { ConversationSidebar } from "@/components/conversation-sidebar";
-import { startConversation } from "@/app/chat/actions";
+import { HomeComposer } from "@/components/home-composer";
 import { supabaseConversationsClient } from "@/lib/people-search/conversations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -61,59 +60,32 @@ export default async function Home() {
     member.id,
   );
 
-  const hero = (
+  const welcome = (
     <>
-      <h1 className="text-2xl font-semibold">
+      <h1 className="text-2xl font-semibold md:text-5xl md:tracking-tight">
         Salut, barbate!
       </h1>
-      <p className="text-sm">
+      <p className="text-sm md:text-xl">
         Aici găsești toate resursele comunitatii
       </p>
-      <p className="mt-4 text-sm font-medium">Spune ce ai nevoie</p>
-      <form
-        action={startConversation}
-        className="flex w-full items-end gap-2 rounded-2xl border border-zinc-600 bg-zinc-700 p-3"
-      >
-        <textarea
-          name="q"
-          rows={3}
-          required
-          placeholder="Vreau să construiesc o casă din materiale naturale. Cine din comunitate mă poate ajuta?"
-          className="flex-1 resize-none bg-transparent text-sm text-left text-white outline-none placeholder:text-zinc-400"
-        />
-        <button
-          type="submit"
-          aria-label="Trimite"
-          className="rounded-lg bg-purple-600 px-4 py-2 text-white disabled:opacity-50 hover:bg-purple-700"
-        >
-          Trimite
-        </button>
-      </form>
     </>
   );
 
-  if (summaries.length === 0) {
-    return (
-      <>
-        <AuthedMenu isAdmin={member.role === "admin"} />
-        <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-          {hero}
-        </main>
-      </>
-    );
-  }
-
   return (
-    <>
-      <AuthedMenu isAdmin={member.role === "admin"} />
-      <div className="flex h-[calc(100vh-3.5rem)] w-full flex-1">
-        <ConversationSidebar conversations={summaries} activeId="" />
-        <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-          <div className="flex w-full max-w-2xl flex-col items-center gap-4">
-            {hero}
+    <div className="flex min-h-0 w-full flex-1">
+      {summaries.length > 0 && <ConversationSidebar conversations={summaries} activeId="" />}
+      <main className="flex min-h-0 flex-1 flex-col items-center px-4 text-center md:px-6">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 md:-translate-y-12 md:gap-8">
+          {welcome}
+          <p className="text-sm font-medium md:text-lg">Spune ce ai nevoie</p>
+          <div className="mt-4 hidden w-[min(54vw,42rem)] md:block">
+            <HomeComposer />
           </div>
-        </main>
-      </div>
-    </>
+        </div>
+        <div className="w-full max-w-2xl shrink-0 pb-3 md:hidden">
+          <HomeComposer />
+        </div>
+      </main>
+    </div>
   );
 }

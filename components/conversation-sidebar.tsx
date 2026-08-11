@@ -8,8 +8,7 @@ import { deleteConversationAction } from "@/app/chat/actions";
 import type { ConversationSummary } from "@/lib/people-search/conversations";
 
 // Past Conversations + "New chat" (stories 13, 14, 24, 25). Always visible on
-// desktop; a toggleable drawer on mobile so the narrow screen stays on the chat.
-// The app-wide AuthedMenu burger is separate -- it has a different job.
+// desktop. Mobile Conversation navigation lives in the app-wide menu drawer.
 export function ConversationSidebar({
   conversations,
   activeId,
@@ -18,7 +17,6 @@ export function ConversationSidebar({
   activeId: string;
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -33,7 +31,6 @@ export function ConversationSidebar({
       }
 
       toast.success("Conversația a fost ștearsă.");
-      setOpen(false);
       if (id === activeId) router.push("/");
       else router.refresh();
     });
@@ -43,7 +40,7 @@ export function ConversationSidebar({
     <nav className="flex h-full flex-col gap-1 p-3">
       <Link
         href="/"
-        className="mb-2 rounded-lg bg-purple-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-purple-700"
+        className="mb-2 rounded-lg border border-zinc-700 px-3 py-2 text-center text-sm font-medium text-zinc-200 transition hover:bg-zinc-800 hover:text-white"
       >
         + Conversație nouă
       </Link>
@@ -58,7 +55,6 @@ export function ConversationSidebar({
         >
           <Link
             href={`/chat/${c.id}`}
-            onClick={() => setOpen(false)}
             className="min-w-0 flex-1 truncate px-3 py-2 pr-9"
           >
             {c.title?.trim() || "Conversație fără titlu"}
@@ -81,35 +77,8 @@ export function ConversationSidebar({
   );
 
   return (
-    <>
-      {/* Mobile: a button opens the drawer. */}
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="m-3 inline-flex items-center gap-1 self-start rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-white md:hidden"
-      >
-        ☰ Conversații
-      </button>
-
-      {/* Desktop: always-visible column. */}
-      <aside className="hidden w-48 shrink-0 border-r border-zinc-800 md:block">
-        {list}
-      </aside>
-
-      {/* Mobile drawer. */}
-      {open && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <button
-            type="button"
-            aria-label="Închide"
-            onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-black/30"
-          />
-          <div className="absolute left-0 top-0 h-full w-48 bg-zinc-900 shadow-xl">
-            {list}
-          </div>
-        </div>
-      )}
-    </>
+    <aside className="hidden w-48 shrink-0 border-r border-zinc-800 md:block">
+      {list}
+    </aside>
   );
 }

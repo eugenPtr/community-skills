@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { AuthedMenu } from "@/components/authed-menu";
 import { MemberCard } from "@/components/member-card";
 import {
   listMembers,
@@ -27,8 +26,6 @@ export default async function MembersPage() {
   const members = await listMembers(supabaseListMembersClient(supabase));
 
   return (
-    <>
-      <AuthedMenu isAdmin={member.role === "admin"} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <h1 className="text-2xl font-semibold">Membri</h1>
         <ul className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4">
@@ -37,6 +34,5 @@ export default async function MembersPage() {
           ))}
         </ul>
       </main>
-    </>
   );
 }

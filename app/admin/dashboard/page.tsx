@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { AuthedMenu } from "@/components/authed-menu";
 import { AdminInviteTable } from "@/components/admin-invite-table";
 import { listInvites, supabaseListInvitesClient } from "@/lib/invites/list";
 import {
@@ -27,13 +26,10 @@ export default async function AdminDashboardPage() {
   const invites = await listInvites(supabaseListInvitesClient(service));
 
   return (
-    <>
-      <AuthedMenu isAdmin />
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
         <h1 className="text-2xl font-semibold">Panou de administrare</h1>
         <p className="mt-1 text-sm text-white">Toate invitațiile din rețea.</p>
         <AdminInviteTable invites={invites} />
       </main>
-    </>
   );
 }

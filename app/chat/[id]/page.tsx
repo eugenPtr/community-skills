@@ -1,6 +1,5 @@
 import { notFound, redirect } from "next/navigation";
 import type { UIMessage } from "ai";
-import { AuthedMenu } from "@/components/authed-menu";
 import { ChatView } from "@/components/chat-view";
 import { ConversationSidebar } from "@/components/conversation-sidebar";
 import { supabaseConversationsClient } from "@/lib/people-search/conversations";
@@ -55,12 +54,10 @@ export default async function ChatPage({
   }));
 
   return (
-    <>
-      <AuthedMenu />
-      <div className="flex h-[calc(100vh-3.5rem)] w-full flex-1">
+      <div className="conversation-shell flex min-h-0 w-full flex-1">
         <ConversationSidebar conversations={summaries} activeId={id} />
-        <main className="flex flex-1 justify-center">
-          <div className="flex h-full w-full max-w-3xl flex-col">
+        <main className="flex min-h-0 flex-1 justify-center overflow-hidden">
+          <div className="flex min-h-0 w-full max-w-3xl flex-col">
             <ChatView
               conversationId={id}
               initialMessages={initialMessages}
@@ -69,6 +66,5 @@ export default async function ChatPage({
           </div>
         </main>
       </div>
-    </>
   );
 }
