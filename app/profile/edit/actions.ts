@@ -5,6 +5,7 @@ import { isPossiblePhoneNumber, parsePhoneNumber } from "libphonenumber-js/max";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { gatewayEmbedder } from "@/lib/people-search/ai-gateway";
 import { buildProfileContextEmbeddingInput } from "@/lib/people-search/embedding-input";
+import { serializeEmbedding } from "@/lib/people-search/serialize-embedding";
 import { normalizeResources } from "@/lib/resources/model";
 import { validateProfilePhoto } from "@/lib/profile/photo";
 
@@ -39,7 +40,7 @@ export async function saveProfileAction(formData: FormData) {
   const indexed = await Promise.all(resources.map(async (resource, index) => {
     const id = rawResources[index]?.id && existing.has(rawResources[index].id!) ? rawResources[index].id! : crypto.randomUUID();
     const previous = existing.get(id);
-    return { id, ...resource, position: positions[resource.classification]++, embedding: JSON.stringify(previous?.embedding_input === resource.description ? previous.embedding : await gatewayEmbedder(resource.description)), embedding_input: resource.description };
+    return { id, ...resource, position: positions[resource.classification]++, embedding: serializeEmbedding(previous?.embedding_input === resource.description ? previous.embedding : await gatewayEmbedder(resource.description)), embedding_input: resource.description };
   }));
 
   const photo = formData.get("profile_photo");
@@ -55,7 +56,7 @@ export async function saveProfileAction(formData: FormData) {
   const socials = Object.fromEntries(["website", "linkedin", "facebook", "instagram", "x"].map((key) => [key, String(formData.get(key) ?? "").trim()]));
   const { error } = await supabase.rpc("update_own_profile", {
     p_profile: { first_name: firstName, last_name: lastName, location, passions, heart_project_description: heartProjectDescription,
-      heart_project_seeking: heartProjectSeeking, profile_photo_path: newPath ?? "", profile_context_embedding: JSON.stringify(contextEmbedding), profile_context_embedding_input: contextInput },
+      heart_project_seeking: heartProjectSeeking, profile_photo_path: newPath ?? "", profile_context_embedding: serializeEmbedding(contextEmbedding), profile_context_embedding_input: contextInput },
     p_socials: { ...socials, phone: parsePhoneNumber(phone).number, email },
     p_resources: indexed,
     p_community_ids: communityIds,
