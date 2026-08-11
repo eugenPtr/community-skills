@@ -71,18 +71,29 @@ describe("OnboardingForm", () => {
     const user = userEvent.setup();
     render(<OnboardingForm invite="DEV" memberId="m1" loginEmail="ana@example.com" />);
     await user.click(screen.getByRole("button", { name: "Începe" }));
-    const input = screen.getByLabelText("Incarca o fotografie de profil");
+    const input = screen.getByLabelText("Încarcă o fotografie de profil (max. 5 MB)");
     const photo = new File(["photo"], "profil.png", { type: "image/png" });
 
     await user.upload(input, photo);
-    expect(screen.queryByLabelText("Schimba")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Schimbă fotografia (max. 5 MB)")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Elimină selecția" }));
-    expect(screen.getByLabelText("Incarca o fotografie de profil")).toBeInTheDocument();
+    expect(screen.getByLabelText("Încarcă o fotografie de profil (max. 5 MB)")).toBeInTheDocument();
 
-    const replacementInput = screen.getByLabelText("Incarca o fotografie de profil");
+    const replacementInput = screen.getByLabelText("Încarcă o fotografie de profil (max. 5 MB)");
     await user.upload(replacementInput, photo);
-    expect(screen.queryByLabelText("Schimba")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Schimbă fotografia (max. 5 MB)")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Elimină selecția" })).toBeInTheDocument();
+  });
+
+  it("shows a toast instead of accepting a photo over 5 MB", async () => {
+    const user = userEvent.setup();
+    render(<OnboardingForm invite="DEV" memberId="m1" loginEmail="ana@example.com" />);
+    await user.click(screen.getByRole("button", { name: "Începe" }));
+    const oversized = new File([new Uint8Array(5 * 1024 * 1024 + 1)], "mare.png", { type: "image/png" });
+
+    await user.upload(screen.getByLabelText("Încarcă o fotografie de profil (max. 5 MB)"), oversized);
+
+    expect(mocks.toast.error).toHaveBeenCalledWith("Fotografia trebuie să aibă cel mult 5 MB.");
   });
 
   it("submits classified Resources in their visible order", async () => {

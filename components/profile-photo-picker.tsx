@@ -22,7 +22,7 @@ export function ProfilePhotoPicker({
         htmlFor={id}
         className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-500 hover:bg-white/5 hover:text-white focus-within:ring-2 focus-within:ring-white focus-within:ring-offset-2 focus-within:ring-offset-zinc-950"
       >
-        {hasPhoto ? "Schimba" : "Incarca o fotografie de profil"}
+        {hasPhoto ? "Schimbă fotografia (max. 5 MB)" : "Încarcă o fotografie de profil (max. 5 MB)"}
         <input
           id={id}
           type="file"
