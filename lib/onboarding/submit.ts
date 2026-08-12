@@ -9,6 +9,18 @@ export type SubmitOnboardingResult =
   | { kind: "invalidCode" }
   | { kind: "missingFields" };
 
+export class OnboardingInfrastructureError extends Error {
+  constructor(
+    readonly stage: "embedding" | "complete-onboarding-rpc",
+    message: string,
+    readonly databaseCode?: string,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.name = "OnboardingInfrastructureError";
+  }
+}
+
 export interface SocialsInput {
   phone?: string; email?: string; website?: string; linkedin?: string;
   facebook?: string; instagram?: string; x?: string;
@@ -48,14 +60,25 @@ export async function submitOnboarding(
 
   // Index first. If Gateway embedding fails, no Member/Profile/Invite/Resource write occurs.
   const profileContextEmbeddingInput = buildProfileContextEmbeddingInput(opts);
-  const [profileContextEmbedding, indexed] = await Promise.all([
-    deps.embedder(profileContextEmbeddingInput),
-    Promise.all(resources.map(async (resource) => ({
-    ...resource,
-    position: resources.filter((r) => r.classification === resource.classification).indexOf(resource),
-    embedding: await deps.embedder(resource.description),
-    }))),
-  ]);
+  let profileContextEmbedding: number[];
+  let indexed: Array<ResourceInput & { position: number; embedding: number[] }>;
+  try {
+    [profileContextEmbedding, indexed] = await Promise.all([
+      deps.embedder(profileContextEmbeddingInput),
+      Promise.all(resources.map(async (resource) => ({
+        ...resource,
+        position: resources.filter((r) => r.classification === resource.classification).indexOf(resource),
+        embedding: await deps.embedder(resource.description),
+      }))),
+    ]);
+  } catch (error) {
+    throw new OnboardingInfrastructureError(
+      "embedding",
+      "Onboarding embedding failed",
+      undefined,
+      { cause: error },
+    );
+  }
   const socials = Object.fromEntries(SOCIAL_FIELDS.map((field) => [field, opts.socials?.[field]?.trim() || null]));
   socials.phone = parsePhoneNumber(phone).number;
   socials.email = contactEmail;
@@ -66,5 +89,9 @@ export async function submitOnboarding(
   if (!error) return { kind: "ok" };
   if (error.code === "P0001") return { kind: "invalidCode" };
   if (error.code === "P0002") return { kind: "alreadyClaimed" };
-  throw new Error(`completeOnboarding failed: ${error.message}`);
+  throw new OnboardingInfrastructureError(
+    "complete-onboarding-rpc",
+    `completeOnboarding failed: ${error.message}`,
+    error.code,
+  );
 }

@@ -253,15 +253,87 @@ export default function OnboardingForm({
 
     try {
       const result = await submitOnboardingAction(formData);
-      if (result?.kind === "invalidPhoto") { toast.error("Fișierul nu este o imagine JPEG, PNG sau WebP validă."); return; }
-      if (result?.kind === "photoUploadFailed") { toast.error("Fotografia nu a putut fi încărcată. Încearcă din nou sau elimină selecția."); return; }
-      if (result?.kind === "ok") {
-        localStorage.removeItem(draftKey);
-        router.replace("/");
+      switch (result.kind) {
+        case "ok":
+          localStorage.removeItem(draftKey);
+          router.replace("/");
+          return;
+        case "invalidPhoto":
+          toast.error("Fișierul nu este o imagine JPEG, PNG sau WebP validă.");
+          return;
+        case "photoUploadFailed":
+          toast.error("Fotografia nu a putut fi încărcată. Încearcă din nou sau elimină selecția.");
+          return;
+        case "missingFields": {
+          clearUploadedPhoto();
+          const identityMissing = ["firstName", "lastName", "location"].filter(
+            (field) => !values[field as "firstName" | "lastName" | "location"].trim(),
+          );
+          if (values.communityIds.length === 0) identityMissing.push("communityIds");
+          const profileMissing = [
+            ...(!values.passions.trim() ? ["passions"] : []),
+            ...(values.heartProject === null ? ["heartProject"] : []),
+            ...(values.heartProject === true && !values.heartProjectDescription.trim()
+              ? ["heartProjectDescription"]
+              : []),
+          ];
+          const resourceMissing = values.resources.length === 0 ? ["resources"] : [];
+          const contactMissing = [
+            ...(!values.phone || !isPossiblePhoneNumber(values.phone) ? ["phone"] : []),
+            ...(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.contactEmail.trim())
+              ? ["contactEmail"]
+              : []),
+          ];
+          const missing = [...identityMissing, ...profileMissing, ...resourceMissing, ...contactMissing];
+          setInvalid(missing);
+          setStep(identityMissing.length ? 1 : profileMissing.length ? 2 : resourceMissing.length ? 3 : 4);
+          toast.error("Unele informații obligatorii lipsesc. Verifică datele evidențiate.");
+          return;
+        }
+        case "alreadyClaimed":
+          clearUploadedPhoto();
+          toast.error("Acest link de invitație a fost deja folosit. Autentifică-te sau cere ajutor unui administrator.");
+          return;
+        case "invalidCode":
+          clearUploadedPhoto();
+          toast.error("Linkul de invitație nu este valid. Cere un link nou unui administrator.");
+          return;
+        case "embeddingFailed":
+          clearUploadedPhoto();
+          toast.error(
+            `Serviciul de procesare nu este disponibil momentan. Datele tale au rămas salvate. Încearcă din nou. Cod eroare: ${result.reference}`,
+            { duration: 10_000 },
+          );
+          return;
+        case "submissionFailed":
+          clearUploadedPhoto();
+          toast.error(
+            `Înregistrarea nu a putut fi finalizată. Datele tale au rămas salvate. Încearcă din nou. Cod eroare: ${result.reference}`,
+            { duration: 10_000 },
+          );
+          return;
+        default: {
+          const exhaustive: never = result;
+          return exhaustive;
+        }
       }
+    } catch {
+      const reference = crypto.randomUUID().replaceAll("-", "").slice(0, 8).toUpperCase();
+      toast.error(
+        `Înregistrarea nu a putut fi finalizată. Datele tale au rămas salvate. Încearcă din nou. Cod eroare: ${reference}`,
+        { duration: 10_000 },
+      );
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function clearUploadedPhoto() {
+    if (!photo) return;
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhoto(null);
+    setPhotoPreview(null);
+    toast.error("Fotografia a fost eliminată după eroare. Selecteaz-o din nou înainte de retrimitere.");
   }
 
   if (!started) {

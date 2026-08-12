@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { PGlite } from "@electric-sql/pglite";
-import { submitOnboarding } from "@/lib/onboarding/submit";
+import { OnboardingInfrastructureError, submitOnboarding } from "@/lib/onboarding/submit";
 import { createTestDb, pgliteOnboardingAdapter, seedUnclaimedInvite } from "./db";
 
 const BASE_PROFILE = {
@@ -281,9 +281,29 @@ describe("submitOnboarding (S1 integration seam)", () => {
   it("publishes nothing when synchronous Resource indexing fails", async () => {
     const seeded = await seedUnclaimedInvite(db, { code: "DEV-INDEX-FAIL", email: "index@example.com" });
     await expect(submitOnboarding({ db: pgliteOnboardingAdapter(db), embedder: async () => { throw new Error("gateway unavailable"); } },
-      { userId: seeded.userId, email: seeded.email, code: seeded.code, ...BASE_PROFILE })).rejects.toThrow("gateway unavailable");
+      { userId: seeded.userId, email: seeded.email, code: seeded.code, ...BASE_PROFILE })).rejects.toMatchObject({
+        name: "OnboardingInfrastructureError",
+        stage: "embedding",
+      } satisfies Partial<OnboardingInfrastructureError>);
     expect((await db.query("select id from members where id=$1", [seeded.userId])).rows).toEqual([]);
     const invite = await db.query<{ claimed_by: string | null }>("select claimed_by from invites where code=$1", [seeded.code]);
     expect(invite.rows[0].claimed_by).toBeNull();
+  });
+
+  it("preserves expected RPC errors and types unexpected database failures", async () => {
+    const payload = {
+      userId: crypto.randomUUID(), email: "rpc@example.com", code: "DEV-RPC", ...BASE_PROFILE,
+    };
+    const embedder = async () => [1, 0, 0];
+    const dbError = (code: string) => ({
+      completeOnboarding: async () => ({ error: { code, message: "database detail" } }),
+    });
+
+    await expect(submitOnboarding({ db: dbError("P0001"), embedder }, payload))
+      .resolves.toEqual({ kind: "invalidCode" });
+    await expect(submitOnboarding({ db: dbError("P0002"), embedder }, payload))
+      .resolves.toEqual({ kind: "alreadyClaimed" });
+    await expect(submitOnboarding({ db: dbError("23514"), embedder }, payload))
+      .rejects.toMatchObject({ stage: "complete-onboarding-rpc", databaseCode: "23514" });
   });
 });

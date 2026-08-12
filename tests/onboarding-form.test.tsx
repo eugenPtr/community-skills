@@ -42,6 +42,14 @@ describe("OnboardingForm", () => {
     await user.type(input, `${text}{Enter}`);
   }
 
+  async function reachContact(user: ReturnType<typeof userEvent.setup>) {
+    await reachResources(user);
+    await addFreeResource(user);
+    await user.click(screen.getByRole("button", { name: "Înainte" }));
+    await user.type(screen.getByLabelText("Telefon (obligatoriu)"), "721234567");
+    await user.type(screen.getByLabelText("Email de contact (obligatoriu)"), "contact@example.com");
+  }
+
   it("starts with a shared intro, then shows progress without repeating the intro copy", async () => {
     const user = userEvent.setup();
     render(<OnboardingForm invite="DEV" memberId="m1" loginEmail="ana@example.com" />);
@@ -135,5 +143,37 @@ describe("OnboardingForm", () => {
     render(<OnboardingForm invite="DEV" memberId="m1" loginEmail="ana@example.com" />);
     await user.click(screen.getByRole("button", { name: "Începe" }));
     expect(screen.getByText("Pasul 1/4")).toBeInTheDocument();
+  });
+
+  it("surfaces an unexpected failure, preserves the draft, and permits retry", async () => {
+    const user = userEvent.setup();
+    mocks.submit
+      .mockResolvedValueOnce({ kind: "submissionFailed", reference: "ABC12345" })
+      .mockResolvedValueOnce({ kind: "ok" });
+    render(<OnboardingForm invite="DEV" memberId="m1" loginEmail="ana@example.com" />);
+    await reachContact(user);
+
+    const submit = screen.getByRole("button", { name: "Finalizează înregistrarea" });
+    await user.click(submit);
+    expect(mocks.toast.error).toHaveBeenCalledWith(
+      expect.stringContaining("ABC12345"),
+      { duration: 10_000 },
+    );
+    expect(submit).toBeEnabled();
+    expect(screen.getByLabelText("Email de contact (obligatoriu)")).toHaveValue("contact@example.com");
+    expect(localStorage.getItem("onboarding-draft:m1:DEV")).toContain("contact@example.com");
+
+    await user.click(submit);
+    expect(mocks.replace).toHaveBeenCalledWith("/");
+    expect(localStorage.getItem("onboarding-draft:m1:DEV")).toBeNull();
+  });
+
+  it("shows actionable feedback for an already-claimed invitation", async () => {
+    const user = userEvent.setup();
+    mocks.submit.mockResolvedValue({ kind: "alreadyClaimed" });
+    render(<OnboardingForm invite="DEV" memberId="m1" loginEmail="ana@example.com" />);
+    await reachContact(user);
+    await user.click(screen.getByRole("button", { name: "Finalizează înregistrarea" }));
+    expect(mocks.toast.error).toHaveBeenCalledWith(expect.stringContaining("deja folosit"));
   });
 });
