@@ -1,9 +1,22 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { startConversation } from "@/app/chat/actions";
 
 export function HomeComposer() {
+  return (
+    <form
+      action={startConversation}
+      className="flex min-h-[3.625rem] w-full items-end gap-2 rounded-[1.75rem] border border-zinc-600 bg-zinc-800 p-2 pl-4 shadow-lg shadow-black/20 md:min-h-24 md:p-3 md:pl-5"
+    >
+      <ComposerFields />
+    </form>
+  );
+}
+
+function ComposerFields() {
+  const { pending } = useFormStatus();
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -15,10 +28,7 @@ export function HomeComposer() {
   }
 
   return (
-    <form
-      action={startConversation}
-      className="flex min-h-[3.625rem] w-full items-end gap-2 rounded-[1.75rem] border border-zinc-600 bg-zinc-800 p-2 pl-4 shadow-lg shadow-black/20 md:min-h-24 md:p-3 md:pl-5"
-    >
+    <>
       <textarea
         ref={textareaRef}
         name="q"
@@ -30,7 +40,7 @@ export function HomeComposer() {
           resize();
         }}
         onKeyDown={(event) => {
-          if (event.key === "Enter" && !event.shiftKey && value.trim()) {
+          if (event.key === "Enter" && !event.shiftKey && value.trim() && !pending) {
             event.preventDefault();
             event.currentTarget.form?.requestSubmit();
           }
@@ -40,13 +50,39 @@ export function HomeComposer() {
       />
       <button
         type="submit"
-        disabled={!value.trim()}
-        aria-label="Trimite"
+        disabled={pending || !value.trim()}
+        aria-label={pending ? "Se trimite" : "Trimite"}
+        aria-busy={pending}
         className="flex size-10 shrink-0 items-center justify-center rounded-full bg-purple-600 text-white transition hover:bg-purple-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-300 disabled:bg-zinc-600 disabled:text-zinc-400"
       >
-        <ArrowUpIcon />
+        {pending ? <SpinnerIcon /> : <ArrowUpIcon />}
       </button>
-    </form>
+    </>
+  );
+}
+
+function SpinnerIcon() {
+  return (
+    <svg
+      className="size-5 animate-spin"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="9"
+        stroke="currentColor"
+        strokeWidth="3"
+      />
+      <path
+        className="opacity-90"
+        fill="currentColor"
+        d="M21 12a9 9 0 0 0-9-9v3a6 6 0 0 1 6 6h3Z"
+      />
+    </svg>
   );
 }
 
