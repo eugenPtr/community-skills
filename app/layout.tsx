@@ -54,7 +54,7 @@ export default async function RootLayout({
         )}
         {children}
         {member && <SiteFooter />}
-        <Toaster richColors position="top-center" duration={5000} />
+        <Toaster theme="dark" richColors position="top-center" duration={5000} />
         <Suspense>
           <SearchParamsToast />
         </Suspense>
